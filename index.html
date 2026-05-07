@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tokyo Jazz Map · 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Shippori+Mincho:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#efe9dc;
+    --paper-2:#e6dfce;
+    --ink:#2a2520;
+    --ink-soft:#5a4f44;
+    --line:rgba(42,37,32,0.18);
+    --line-soft:rgba(42,37,32,0.08);
+    --kissa:#7a5a3a;
+    --bar:#3a2a20;
+    --accent:#8a4a2a;
+    --hairline:0.5px;
+  }
+  body.night{
+    --paper:#1c1813;
+    --paper-2:#15110d;
+    --ink:#e8dfcd;
+    --ink-soft:#9a8e7a;
+    --line:rgba(232,223,205,0.14);
+    --line-soft:rgba(232,223,205,0.06);
+    --kissa:#d4b078;
+    --bar:#e8dfcd;
+    --accent:#d48050;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--paper);color:var(--ink);font-family:'Cormorant Garamond',Georgia,serif;font-weight:400;-webkit-font-smoothing:antialiased;transition:background 0.6s ease,color 0.6s ease;font-size:16px}
+  body{min-height:100vh}
+
+  /* ============ HEADER ============ */
+  header{
+    padding:28px 40px 22px;
+    border-bottom:var(--hairline) solid var(--line);
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:24px;
+    align-items:start;
+  }
+  .brand{display:flex;flex-direction:column;gap:4px}
+  .brand h1{
+    font-family:'Cormorant Garamond',serif;
+    font-weight:400;
+    font-size:14px;
+    letter-spacing:0.3em;
+    text-transform:uppercase;
+  }
+  .brand .sub{
+    font-size:11px;
+    letter-spacing:0.22em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  .mode-toggle{
+    display:flex;
+    border:var(--hairline) solid var(--line);
+    font-size:10px;
+    letter-spacing:0.25em;
+    text-transform:uppercase;
+  }
+  .mode-toggle button{
+    background:none;
+    border:none;
+    cursor:pointer;
+    color:var(--ink-soft);
+    padding:10px 18px;
+    font-family:inherit;
+    font-size:inherit;
+    letter-spacing:inherit;
+    text-transform:inherit;
+    transition:all 0.3s ease;
+    border-right:var(--hairline) solid var(--line);
+  }
+  .mode-toggle button:last-child{border-right:none}
+  .mode-toggle button.active{background:var(--ink);color:var(--paper)}
+  .mode-toggle button:hover:not(.active){color:var(--ink)}
+
+  /* ============ NAV ============ */
+  .nav{
+    padding:16px 40px;
+    border-bottom:var(--hairline) solid var(--line);
+    display:flex;
+    gap:32px;
+    align-items:center;
+    font-size:11px;
+    letter-spacing:0.22em;
+    text-transform:uppercase;
+  }
+  .nav .label{color:var(--ink-soft);margin-right:8px}
+  .nav button{
+    background:none;border:none;cursor:pointer;
+    color:var(--ink-soft);
+    font-family:inherit;font-size:inherit;letter-spacing:inherit;text-transform:inherit;
+    padding:6px 0;
+    position:relative;
+    transition:color 0.3s ease;
+  }
+  .nav button:hover{color:var(--ink)}
+  .nav button.active{color:var(--ink)}
+  .nav button.active::after{
+    content:"";position:absolute;left:0;right:0;bottom:-17px;height:1.5px;background:var(--ink);
+  }
+  .nav .star{color:var(--accent)}
+
+  /* ============ SUB NAV ============ */
+  .subnav{
+    padding:14px 40px;
+    border-bottom:var(--hairline) solid var(--line);
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--ink-soft);
+  }
+  .subnav-left{display:flex;gap:24px}
+  .subnav button{
+    background:none;border:none;cursor:pointer;
+    color:var(--ink-soft);font-family:inherit;font-size:inherit;letter-spacing:inherit;text-transform:inherit;
+    padding:4px 0;position:relative;transition:color 0.3s ease;
+  }
+  .subnav button.active{color:var(--ink)}
+  .subnav button.active::after{
+    content:"";position:absolute;left:0;right:0;bottom:-15px;height:1.5px;background:var(--ink);
+  }
+  .count{color:var(--ink-soft)}
+  .count b{color:var(--ink);font-weight:500}
+
+  /* ============ MAP ============ */
+  .map-wrap{
+    position:relative;
+    padding:40px;
+    border-bottom:var(--hairline) solid var(--line);
+  }
+  .map{
+    width:100%;
+    height:520px;
+    position:relative;
+    background:var(--paper-2);
+    overflow:hidden;
+  }
+  body.night .map{background:#0f0c08}
+
+  /* subtle paper texture */
+  .map::before{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(42,37,32,0.025) 0, transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(42,37,32,0.02) 0, transparent 50%);
+    z-index:1;
+  }
+
+  .map svg{width:100%;height:100%;display:block;position:relative;z-index:2}
+
+  .map-legend{
+    position:absolute;
+    bottom:60px;left:60px;
+    display:flex;flex-direction:column;gap:8px;
+    font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-soft);
+    z-index:3;
+  }
+  .map-legend .item{display:flex;align-items:center;gap:10px}
+  .map-legend .swatch{width:8px;height:8px;border-radius:50%;display:inline-block}
+  .map-legend .kissa{background:var(--kissa)}
+  .map-legend .bar{background:var(--bar);border:1px solid var(--ink-soft)}
+  .map-legend .star{color:var(--accent)}
+
+  .map-reset{
+    position:absolute;
+    top:60px;right:60px;
+    background:none;border:var(--hairline) solid var(--line);
+    color:var(--ink-soft);font-family:inherit;
+    font-size:10px;letter-spacing:0.22em;text-transform:uppercase;
+    padding:8px 14px;cursor:pointer;
+    transition:all 0.3s ease;z-index:3;
+  }
+  .map-reset:hover{color:var(--ink);border-color:var(--ink)}
+
+  /* dot styles on the map svg */
+  .dot{cursor:pointer;transition:r 0.2s ease,opacity 0.4s ease}
+  .dot.kissa{fill:var(--kissa)}
+  .dot.bar{fill:var(--bar);stroke:var(--ink-soft);stroke-width:0.5}
+  body.night .dot.bar{fill:var(--bar);stroke:none}
+  body.night .dot.kissa{fill:var(--kissa)}
+  .dot.starred{stroke:var(--accent);stroke-width:1.5}
+  .dot:hover{r:6}
+  .dot.dim{opacity:0.12}
+  .dot.active{r:7;stroke:var(--accent);stroke-width:2}
+
+  .label-text{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;fill:var(--ink-soft);pointer-events:none}
+  .yamanote{fill:none;stroke:var(--ink-soft);stroke-width:0.6;stroke-dasharray:2 2;opacity:0.55}
+  .ward-line{fill:none;stroke:var(--ink-soft);stroke-width:0.4;opacity:0.25}
+  .grid-line{stroke:var(--ink-soft);stroke-width:0.3;opacity:0.08}
+
+  /* ============ TABLE + DETAIL ============ */
+  .body-grid{
+    display:grid;
+    grid-template-columns:1fr 380px;
+    min-height:60vh;
+  }
+  @media (max-width:980px){
+    .body-grid{grid-template-columns:1fr}
+  }
+
+  .table-wrap{border-right:var(--hairline) solid var(--line);overflow:hidden}
+  body.night .table-wrap{border-right-color:var(--line)}
+
+  .thead{
+    display:grid;
+    grid-template-columns:2.2fr 1fr 1.4fr 0.6fr;
+    padding:18px 40px;
+    font-size:10px;letter-spacing:0.25em;text-transform:uppercase;color:var(--ink-soft);
+    border-bottom:var(--hairline) solid var(--line);
+  }
+  .row{
+    display:grid;
+    grid-template-columns:2.2fr 1fr 1.4fr 0.6fr;
+    padding:20px 40px;
+    border-bottom:var(--hairline) solid var(--line-soft);
+    cursor:pointer;
+    transition:background 0.25s ease;
+    align-items:center;
+  }
+  .row:hover{background:var(--paper-2)}
+  body.night .row:hover{background:#221c15}
+  .row.active{background:var(--paper-2)}
+  body.night .row.active{background:#221c15}
+  .row .place-cell{display:flex;align-items:baseline;gap:10px}
+  .row .star{color:var(--accent);font-size:10px;width:10px;display:inline-block}
+  .row .jp-name{font-family:'Shippori Mincho',serif;font-size:14px;color:var(--ink)}
+  .row .en-name{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:var(--ink)}
+  .row .ward{font-family:'Shippori Mincho',serif;font-size:13px;color:var(--ink-soft)}
+  .row .types{display:flex;gap:6px}
+  .tag{
+    font-family:'Cormorant Garamond',serif;font-size:11px;letter-spacing:0.1em;
+    border:var(--hairline) solid var(--line);padding:2px 7px;color:var(--ink-soft);
+    text-transform:uppercase;
+  }
+  .tag.live{border-color:var(--ink);color:var(--ink)}
+  .row .smoke{font-size:14px;color:var(--ink-soft);text-align:center}
+  .air-icon{font-size:14px}
+  .air-icon.clean{color:#5a8a4a}
+  .air-icon.smoking{color:#a8806a;opacity:0.7}
+  body.night .air-icon.clean{color:#9ac080}
+  body.night .air-icon.smoking{color:#8a6a55}
+  .row.hidden{display:none}
+
+  /* ============ DETAIL PANE ============ */
+  .detail{
+    padding:40px;
+    position:sticky;
+    top:0;
+    align-self:start;
+    max-height:100vh;
+    overflow-y:auto;
+  }
+  .detail-empty{color:var(--ink-soft);font-style:italic;font-size:14px}
+  .detail-loc{font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:20px}
+  .detail-loc .jp{font-family:'Shippori Mincho',serif;letter-spacing:0.15em;color:var(--ink)}
+  .detail h2{
+    font-family:'Cormorant Garamond',serif;
+    font-style:italic;
+    font-weight:400;
+    font-size:42px;
+    line-height:1;
+    margin-bottom:6px;
+    letter-spacing:-0.01em;
+  }
+  .detail .alt-name{
+    font-size:11px;letter-spacing:0.25em;text-transform:uppercase;color:var(--ink-soft);
+    margin-bottom:24px;
+  }
+  .detail .pills{display:flex;gap:6px;margin-bottom:28px}
+
+  /* ============ COLLAGE ============ */
+  .collage{
+    display:grid;
+    gap:8px;
+    margin:24px 0 28px;
+    width:100%;
+  }
+  .collage .img{
+    position:relative;overflow:hidden;
+    border:var(--hairline) solid var(--line);
+    filter:saturate(0.6) contrast(0.95);
+    transition:filter 0.4s ease;
+  }
+  .collage .img:hover{filter:saturate(0.85) contrast(1)}
+  .collage .img svg{position:absolute;inset:0;width:100%;height:100%}
+
+  .collage.layout-a{
+    grid-template-columns:1.5fr 1fr;
+    grid-template-rows:1fr 1fr;
+    height:280px;
+  }
+  .collage.layout-a .img-1{grid-row:1 / 3}
+  .collage.layout-a .img-3{transform:translateY(8px)}
+
+  .collage.layout-b{
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:1.4fr 1fr;
+    height:300px;
+  }
+  .collage.layout-b .img-1{grid-column:1 / 3}
+  .collage.layout-b .img-3{transform:translateX(-6px)}
+
+  .collage.layout-c{
+    grid-template-columns:1fr 1.3fr;
+    height:240px;
+  }
+  .collage.layout-c .img-1{transform:translateY(12px)}
+
+  .collage.layout-d{
+    grid-template-columns:1fr 1.4fr 1fr;
+    height:260px;
+  }
+  .collage.layout-d .img-1{transform:translateY(20px)}
+  .collage.layout-d .img-3{transform:translateY(-12px)}
+
+  /* ============ MAPS LINK ============ */
+  .maps-link{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 0;margin-top:16px;
+    border-top:var(--hairline) solid var(--line);
+    border-bottom:var(--hairline) solid var(--line);
+    font-size:11px;letter-spacing:0.25em;text-transform:uppercase;
+    color:var(--ink);text-decoration:none;
+    transition:color 0.3s ease,padding 0.3s ease;
+  }
+  .maps-link:hover{color:var(--accent);padding-left:8px}
+  .maps-link .arrow{font-size:14px;transition:transform 0.3s ease}
+  .maps-link:hover .arrow{transform:translate(2px,-2px)}
+
+  /* ============ FM PLAYER ============ */
+  .fm-player{
+    position:fixed;
+    bottom:20px;right:20px;
+    background:var(--paper-2);
+    border:var(--hairline) solid var(--line-strong, var(--line));
+    padding:14px 18px;
+    display:flex;align-items:center;gap:14px;
+    z-index:50;
+    max-width:380px;
+    box-shadow:0 4px 24px rgba(0,0,0,0.08);
+    transition:all 0.4s ease;
+  }
+  body.night .fm-player{box-shadow:0 4px 24px rgba(0,0,0,0.4)}
+  .fm-player.collapsed{
+    max-width:54px;padding:10px 14px;cursor:pointer;
+  }
+  .fm-player.collapsed .fm-info,.fm-player.collapsed .fm-controls{display:none}
+  .fm-vinyl{
+    width:30px;height:30px;border-radius:50%;flex-shrink:0;
+    background:radial-gradient(circle,
+      #2a1a10 0%,#0a0806 18%,#1a1410 22%,#0a0806 26%,#1a1410 30%,
+      #0a0806 34%,#1a1410 38%,#0a0806 42%,#1a1410 46%,#0a0806 50%,
+      #1a1410 54%,#0a0806 58%,#1a1410 62%,#0a0806 66%,#1a1410 70%,
+      #0a0806 74%,#1a1410 78%,#0a0806 82%,#1a1410 86%);
+    position:relative;
+    box-shadow:0 1px 3px rgba(0,0,0,0.3);
+  }
+  .fm-vinyl::before{
+    content:"";position:absolute;inset:42%;border-radius:50%;
+    background:var(--accent);
+  }
+  .fm-vinyl::after{
+    content:"";position:absolute;inset:47%;border-radius:50%;
+    background:var(--paper-2);
+  }
+  .fm-vinyl.playing{animation:fm-spin 4s linear infinite}
+  @keyframes fm-spin{to{transform:rotate(360deg)}}
+  .fm-info{flex:1;min-width:0}
+  .fm-label{font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:2px}
+  .fm-track{
+    font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;
+    color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .fm-controls{display:flex;gap:6px}
+  .fm-btn{
+    background:none;border:none;color:var(--ink);
+    cursor:pointer;font-size:13px;padding:6px 8px;
+    transition:all 0.2s ease;
+    font-family:inherit;
+    line-height:1;
+    border:var(--hairline) solid transparent;
+  }
+  .fm-btn:hover{color:var(--accent);border-color:var(--line)}
+  .fm-btn.inactive{opacity:0.3;pointer-events:none}
+  .fm-btn.fm-min-btn{font-size:14px;padding-bottom:9px}
+
+  /* ============ VINYL ENTRANCE ============ */
+  .vinyl-loader{
+    position:fixed;inset:0;background:var(--paper);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    z-index:1000;transition:opacity 0.8s ease,visibility 0.8s ease;
+    gap:40px;
+  }
+  .vinyl-loader.gone{opacity:0;visibility:hidden;pointer-events:none}
+  .loader-vinyl{
+    width:180px;height:180px;border-radius:50%;
+    background:radial-gradient(circle,
+      #2a1a10 0%,#0a0806 14%,#1a1410 18%,#0a0806 22%,#1a1410 26%,
+      #0a0806 30%,#1a1410 34%,#0a0806 38%,#1a1410 42%,#0a0806 46%,
+      #1a1410 50%,#0a0806 54%,#1a1410 58%,#0a0806 62%,#1a1410 66%,
+      #0a0806 70%,#1a1410 74%,#0a0806 78%,#1a1410 82%,#0a0806 86%,#1a1410 90%);
+    position:relative;
+    animation:loader-spin 6s linear infinite;
+    box-shadow:0 12px 40px rgba(0,0,0,0.18);
+  }
+  .loader-vinyl::before{
+    content:"";position:absolute;inset:42%;border-radius:50%;
+    background:#8a4a2a;
+  }
+  .loader-vinyl::after{
+    content:"";position:absolute;inset:48%;border-radius:50%;
+    background:var(--paper);
+  }
+  @keyframes loader-spin{to{transform:rotate(360deg)}}
+  .loader-enter{
+    background:none;border:none;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:10px;
+    padding:16px 28px;
+    font-family:inherit;
+    transition:all 0.3s ease;
+  }
+  .loader-enter:hover{transform:translateY(-2px)}
+  .loader-text{
+    font-family:'Cormorant Garamond',serif;font-style:italic;font-size:28px;
+    letter-spacing:0.02em;color:var(--ink);
+    transition:color 0.3s ease;
+  }
+  .loader-enter:hover .loader-text{color:var(--accent)}
+  .loader-sub{
+    font-size:10px;letter-spacing:0.35em;text-transform:uppercase;color:var(--ink-soft);
+  }
+  .loader-foot{
+    position:absolute;bottom:32px;
+    font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:var(--ink-soft);
+    opacity:0.5;
+  }
+
+  .detail .pill{
+    font-size:10px;letter-spacing:0.22em;text-transform:uppercase;
+    border:var(--hairline) solid var(--line);
+    padding:6px 12px;color:var(--ink-soft);
+  }
+  .detail .pill.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+  .detail .section{margin-bottom:24px;padding-bottom:24px;border-bottom:var(--hairline) solid var(--line-soft)}
+  .detail .section:last-child{border-bottom:none}
+  .detail .section h3{
+    font-size:10px;letter-spacing:0.25em;text-transform:uppercase;
+    color:var(--ink-soft);margin-bottom:10px;font-weight:400;
+  }
+  .detail .about{font-size:16px;line-height:1.6;color:var(--ink)}
+  .detail .meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .detail .meta-grid div{font-size:13px;color:var(--ink)}
+  .detail .meta-grid .k{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:2px}
+
+  /* ============ FOOTER ============ */
+  footer{
+    padding:24px 40px;
+    border-top:var(--hairline) solid var(--line);
+    display:flex;justify-content:space-between;
+    font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--ink-soft);
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width:760px){
+    header{grid-template-columns:1fr;padding:20px}
+    .nav,.subnav,.thead,.row{padding-left:20px;padding-right:20px}
+    .map-wrap{padding:20px}
+    .map{height:380px}
+    .thead,.row{grid-template-columns:2fr 1fr 1fr 0.4fr;font-size:11px}
+    .row .en-name{font-size:15px}
+    .row .jp-name{font-size:12px}
+    .detail{padding:24px;position:static;max-height:none}
+    .map-legend{bottom:20px;left:20px}
+    .map-reset{top:20px;right:20px}
+  }
+</style>
+</head>
+<body>
+
+<!-- VINYL LOADER -->
+<div class="vinyl-loader" id="loader">
+  <div class="loader-vinyl"></div>
+  <button class="loader-enter" id="loader-enter">
+    <span class="loader-text">drop the needle</span>
+    <span class="loader-sub">enter ↗</span>
+  </button>
+  <div class="loader-foot">Tokyo Jazz Map · 2026 · Curated by M</div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="brand">
+    <h1>Tokyo Jazz Map</h1>
+    <div class="sub">Jazz Kissa &amp; Jazz Bar · Non-Smoking Priority · 2026 · Curated by M</div>
+  </div>
+  <div class="mode-toggle">
+    <button id="mode-day" class="active">Daylight</button>
+    <button id="mode-night">Nocturne</button>
+  </div>
+</header>
+
+<!-- TYPE NAV -->
+<nav class="nav">
+  <span class="label">Filter</span>
+  <button class="filter-btn active" data-filter="all">All</button>
+  <button class="filter-btn" data-filter="kissa">Kissa</button>
+  <button class="filter-btn" data-filter="live">Live</button>
+  <button class="filter-btn" data-filter="bar">Bar</button>
+  <button class="filter-btn" data-filter="daytime">Daytime</button>
+</nav>
+
+<!-- VIEW NAV -->
+<div class="subnav">
+  <div class="subnav-left">
+    <button class="view-btn active" data-view="map">Map</button>
+    <button class="view-btn" data-view="all">All Places</button>
+  </div>
+  <div class="count"><b id="count">78</b> places</div>
+</div>
+
+<!-- MAP -->
+<div class="map-wrap" id="map-section">
+  <div class="map">
+    <button class="map-reset" id="reset-btn">Reset</button>
+    <div class="map-legend">
+      <div class="item"><span class="swatch kissa"></span>Kissa / Cafe</div>
+      <div class="item"><span class="swatch bar"></span>Bar / Live</div>
+      <div class="item"><span class="star">★</span> M's Pick</div>
+    </div>
+    <svg id="map-svg" viewBox="0 0 1000 520" preserveAspectRatio="xMidYMid meet">
+      <!-- subtle grid -->
+      <g id="grid">
+        <line class="grid-line" x1="0" y1="130" x2="1000" y2="130"/>
+        <line class="grid-line" x1="0" y1="260" x2="1000" y2="260"/>
+        <line class="grid-line" x1="0" y1="390" x2="1000" y2="390"/>
+        <line class="grid-line" x1="250" y1="0" x2="250" y2="520"/>
+        <line class="grid-line" x1="500" y1="0" x2="500" y2="520"/>
+        <line class="grid-line" x1="750" y1="0" x2="750" y2="520"/>
+      </g>
+
+      <!-- Yamanote line (loop) -->
+      <path class="yamanote" d="M 520 130 Q 600 135, 645 175 Q 685 215, 685 280 Q 685 350, 640 395 Q 580 440, 510 440 Q 430 440, 380 395 Q 340 355, 340 285 Q 340 215, 385 170 Q 445 130, 520 130 Z"/>
+
+      <!-- Ward soft outlines -->
+      <g id="wards">
+        <!-- Tokyo bay shape suggestion -->
+        <path class="ward-line" d="M 700 380 Q 760 400, 800 470 Q 850 510, 900 520"/>
+        <!-- River -->
+        <path class="ward-line" d="M 720 100 Q 700 200, 720 300 Q 740 400, 800 480" stroke-dasharray="3 3"/>
+      </g>
+
+      <!-- Area labels -->
+      <g id="labels">
+        <text class="label-text" x="395" y="195">Shinjuku</text>
+        <text class="label-text" x="450" y="375">Shibuya</text>
+        <text class="label-text" x="585" y="395">Roppongi</text>
+        <text class="label-text" x="615" y="305">Ginza</text>
+        <text class="label-text" x="595" y="240">Tokyo</text>
+        <text class="label-text" x="570" y="170">Kanda</text>
+        <text class="label-text" x="500" y="135">Ikebukuro</text>
+        <text class="label-text" x="510" y="290">Yotsuya</text>
+        <text class="label-text" x="240" y="280">Kichijoji</text>
+        <text class="label-text" x="320" y="335">Shimokita</text>
+        <text class="label-text" x="375" y="430">Sangenjaya</text>
+        <text class="label-text" x="660" y="120">Asakusa</text>
+        <text class="label-text" x="660" y="345">Shimbashi</text>
+        <text class="label-text" x="730" y="270">Kayabacho</text>
+        <text class="label-text" x="125" y="340">Kunitachi</text>
+        <text class="label-text" x="555" y="410">Ebisu</text>
+        <text class="label-text" x="540" y="450">Meguro</text>
+        <text class="label-text" x="850" y="180">Kinshicho</text>
+      </g>
+
+      <!-- Dots layer (filled by JS) -->
+      <g id="dots"></g>
+    </svg>
+  </div>
+</div>
+
+<!-- LIST + DETAIL -->
+<div class="body-grid">
+  <div class="table-wrap">
+    <div class="thead">
+      <div>Place</div>
+      <div>Ward</div>
+      <div>Type</div>
+      <div style="text-align:center">Air</div>
+    </div>
+    <div id="rows"></div>
+  </div>
+
+  <aside class="detail" id="detail">
+    <div class="detail-empty">Select a venue to view details.</div>
+  </aside>
+</div>
+
+<!-- FM PLAYER -->
+<div class="fm-player" id="fm-player">
+  <div class="fm-vinyl" id="fm-vinyl"></div>
+  <div class="fm-info">
+    <div class="fm-label">Now Playing · Jazz FM</div>
+    <div class="fm-track" id="fm-track">Press play to listen</div>
+  </div>
+  <div class="fm-controls">
+    <button class="fm-btn" id="fm-play" title="Play">▶</button>
+    <button class="fm-btn" id="fm-pause" title="Pause">❚❚</button>
+    <button class="fm-btn" id="fm-stop" title="Stop">■</button>
+    <button class="fm-btn" id="fm-skip" title="Next">↻</button>
+    <button class="fm-btn fm-min-btn" id="fm-min" title="Minimize">—</button>
+  </div>
+  <audio id="fm-audio" preload="none"></audio>
+</div>
+
+<footer>
+  <div>Tokyo Jazz Map · 2026</div>
+  <div>Non-smoking priority · Curated by M</div>
+</footer>
+
+<script>
+/* =========================================================
+   78 venues — real Tokyo jazz kissa / bars / live houses.
+   Coordinates are SVG positions tuned to the Yamanote layout.
+   types: K=kissa, B=bar, L=live, D=daytime
+   open: array of [openHour, closeHour] in 24h (close >24 means past midnight)
+   star: M's pick
+   ========================================================= */
+const venues = [
+  // ----- Chiyoda / Jimbocho / Yotsuya -----
+  {jp:"いーぐる",en:"Eagle",ward:"千代田区",area:"Yotsuya",types:["K","D"],smoke:false,star:true,open:[[12,22.5]],sound:"JBL Paragon",cover:"None",order:"Blend coffee",about:"A purist's purist. Two JBL Paragons, master Goto curates every record by hand. Strict no-talking past the second set. The benchmark since 1967."},
+  {jp:"Jazz BIGBOY",en:"Jazz BIGBOY",ward:"千代田区",area:"Jimbocho",types:["K","D"],smoke:false,open:[[13,22]],sound:"Aleph mono + JBL 4343B",cover:"None",order:"Coffee",about:"Yellow door on a Jimbocho alley. Pass Aleph mono blocks and JBL 4343B. Owner is warm, selection runs hard bop and modal."},
+  {jp:"Adirondack Cafe",en:"Adirondack Cafe",ward:"千代田区",area:"Jimbocho",types:["K","L","D"],smoke:false,open:[[12,22]],sound:"Vintage Altec",cover:"Live nights ¥2000",order:"Hand drip coffee",about:"Daytime kissa, evening live trio. Wood-paneled, second floor, books and records floor to ceiling."},
+  {jp:"Root Down",en:"Root Down",ward:"千代田区",area:"Jimbocho",types:["B"],smoke:true,open:[[19,28]],sound:"Custom horn",cover:"¥500",order:"Highball",about:"Late-night basement, soul-jazz and rare groove. Master spins until last train, then beyond."},
+  {jp:"響",en:"Hibiki",ward:"千代田区",area:"Kanda",types:["B"],smoke:false,open:[[18,25]],sound:"Tannoy Westminster",cover:"¥800",order:"Single malt",about:"Kanda salaryman crowd, Tannoy Westminsters, the master remembers your last drink three months later."},
+
+  // ----- Shinjuku -----
+  {jp:"DUG",en:"Dug",ward:"新宿区",area:"Shinjuku",types:["K","B","D"],smoke:true,star:true,open:[[11.5,23.5]],sound:"Vintage tube + JBL",cover:"None day, ¥500 night",order:"Dug Special",about:"Murakami wrote here. Down a basement staircase off Yasukuni-dori. The same Coltrane LPs the master has been playing for sixty years."},
+  {jp:"なる",en:"Naru",ward:"新宿区",area:"Shinjuku",types:["L","B"],smoke:false,open:[[17.5,23]],sound:"Tannoy GRF",cover:"¥2500 set",order:"Hayashi rice",about:"Third-floor cube of warm wood. Live trio four nights a week, master plays bass."},
+  {jp:"PIT INN",en:"Pit Inn",ward:"新宿区",area:"Shinjuku",types:["L"],smoke:false,star:true,open:[[14.5,23]],sound:"Live acoustic",cover:"¥3000-5000",order:"Drink minimum",about:"Holy ground for Japanese jazz since 1965. Yamashita Yosuke, Sato Masahiko, the entire avant-garde lineage cycles through."},
+  {jp:"歌舞伎町ジャズ",en:"Kabukicho Jazz",ward:"新宿区",area:"Shinjuku",types:["B"],smoke:true,open:[[20,29]],sound:"Klipsch Heresy",cover:"¥1000",order:"Cocktail",about:"Tucked behind Kabukicho neon, smoky, late, the kind of place last trains were invented to miss."},
+  {jp:"J",en:"J",ward:"新宿区",area:"Shinjuku",types:["B"],smoke:true,open:[[19,27]],sound:"JBL 4344",cover:"¥800",order:"Whisky",about:"Single letter sign, single-minded selection. Hard bop only, regulars only, you'll feel it."},
+  {jp:"DISK UNION JAZZ",en:"Disk Union Jazz",ward:"新宿区",area:"Shinjuku",types:["D"],smoke:false,open:[[11,21]],sound:"Listening stations",cover:"None",order:"Records",about:"Not a kissa but the city's jazz vinyl mecca. Listening stations, basement, vinyl as religion."},
+
+  // ----- Shibuya -----
+  {jp:"名曲喫茶 ライオン",en:"Lion",ward:"渋谷区",area:"Shibuya",types:["K","D"],smoke:false,star:true,open:[[11,22.5]],sound:"1950s custom horn",cover:"None",order:"Coffee · cake",about:"Not jazz, classical, but the same religion. Two stories of red velvet, no talking, no photos. Survived the war."},
+  {jp:"JBS",en:"JBS",ward:"渋谷区",area:"Shibuya",types:["B"],smoke:true,star:true,open:[[19,28]],sound:"Altec / Tannoy",cover:"¥500",order:"Highball",about:"Jazz, Blues &amp; Soul. Eleventh floor, low ceiling, eleven thousand records floor to ceiling. Kobayashi-san DJs six nights a week."},
+  {jp:"Bar Music",en:"Bar Music",ward:"渋谷区",area:"Shibuya",types:["B"],smoke:false,star:true,open:[[19,27]],sound:"Custom horn",cover:"¥800",order:"Negroni",about:"Nakamura Tomoaki's eclectic temple. Bossa, soul, ECM, Japanese ambient through one of Tokyo's best small systems."},
+  {jp:"Mary Jane",en:"Mary Jane",ward:"渋谷区",area:"Shibuya",types:["K","B","D"],smoke:false,open:[[12,24]],sound:"JBL 4344",cover:"None",order:"Coffee or beer",about:"Dogenzaka basement, cassette tape on the wall, one of the few that runs all day into night."},
+  {jp:"OPENLAB",en:"Openlab",ward:"渋谷区",area:"Shibuya",types:["B","L"],smoke:false,open:[[19,26]],sound:"Genelec",cover:"¥1500",order:"Wine",about:"New school listening room, electronic-jazz crossover, occasional live electronics."},
+  {jp:"Bridge",en:"Bridge",ward:"世田谷区",area:"Sangenjaya",types:["B"],smoke:false,open:[[20,28]],sound:"Klipschorn",cover:"¥600",order:"House cocktail",about:"Younger crowd, broader selection, same reverence. Spiritual jazz, library music, ambient."},
+  {jp:"COLTRANE",en:"Coltrane",ward:"渋谷区",area:"Shibuya",types:["B"],smoke:true,open:[[19,28]],sound:"JBL 4350",cover:"¥1000",order:"Bourbon",about:"Single-artist devotion. Trane only, every night, since the late seventies."},
+  {jp:"BAR PIANO",en:"Bar Piano",ward:"渋谷区",area:"Ebisu",types:["B","L"],smoke:false,open:[[18,25]],sound:"Live piano",cover:"¥2000",order:"Cocktail",about:"Real grand piano, real pianist, every night. Quiet trio jazz for the post-dinner crowd."},
+  {jp:"BLUES ALLEY",en:"Blues Alley Japan",ward:"目黒区",area:"Meguro",types:["L"],smoke:false,open:[[18,23]],sound:"Live acoustic",cover:"¥6000-12000",order:"Set menu",about:"Sister to the DC original. Two sets a night, vocal jazz and blues royalty."},
+
+  // ----- Minato (Aoyama, Roppongi, Shimbashi) -----
+  {jp:"Blue Note Tokyo",en:"Blue Note Tokyo",ward:"港区",area:"Minami-Aoyama",types:["L"],smoke:false,star:true,open:[[17.5,24.5]],sound:"Live acoustic",cover:"¥7000-17000",order:"Set menu",about:"International heavyweight. The genuine New York roster routes through here. Wynton can see your table from the bandstand."},
+  {jp:"Body &amp; Soul",en:"Body &amp; Soul",ward:"港区",area:"Minami-Aoyama",types:["L"],smoke:false,open:[[18.5,23]],sound:"Live acoustic",cover:"¥4500",order:"Drink minimum",about:"Owner Kyoko Seki has booked Tokyo's working musicians for forty years. Vocal and small-group jazz, real intimate."},
+  {jp:"Birdland",en:"Birdland Roppongi",ward:"港区",area:"Roppongi",types:["L","B"],smoke:false,open:[[19,26]],sound:"Live + JBL",cover:"¥3500",order:"Drink",about:"Roppongi basement, working bands, mainstream bebop, the late set runs deep."},
+  {jp:"STB139",en:"STB139 Sweet Basil",ward:"港区",area:"Roppongi",types:["L"],smoke:false,open:[[18,23]],sound:"Live acoustic",cover:"¥6000-10000",order:"Set menu",about:"Old Sweet Basil lineage, jazz-fusion and crossover bookings, larger room than the others."},
+  {jp:"アロー",en:"Arrow",ward:"港区",area:"Shimbashi",types:["B"],smoke:true,open:[[18,25]],sound:"Western Electric",cover:"¥1500",order:"Whisky",about:"Tiny salaryman alley bar. Western Electric horns, the master is older than your grandfather, and just as particular."},
+  {jp:"ALFIE",en:"Alfie",ward:"港区",area:"Roppongi",types:["L"],smoke:false,open:[[18.5,23.5]],sound:"Live acoustic",cover:"¥4000",order:"Drink minimum",about:"Vocal-led, Brazilian-jazz, the kind of room where you accidentally see a legend dropping in."},
+
+  // ----- Chuo / Ginza / Nihombashi -----
+  {jp:"ルパン",en:"Bar Lupin",ward:"中央区",area:"Ginza",types:["B"],smoke:true,star:true,open:[[17,24]],sound:"Altec Valencia",cover:"¥1000",order:"Whisky neat",about:"Where the literary set drank in the postwar years. Dazai, Kawabata, and tonight, mid-century Blue Note pressings between glasses of Yamazaki."},
+  {jp:"Bar Whales",en:"Bar Whales",ward:"中央区",area:"Ginza",types:["B"],smoke:false,open:[[18,26]],sound:"Tannoy",cover:"¥1500",order:"Single malt",about:"Sixth-floor Ginza hideout. Cool jazz only, no shouting, real glassware."},
+  {jp:"スイング",en:"Swing",ward:"中央区",area:"Ginza",types:["L","B"],smoke:false,open:[[18,24]],sound:"Live acoustic",cover:"¥3500",order:"Set menu",about:"Ginza institution since the seventies. Tight piano trio, expensive whisky, businessmen on dates that matter."},
+  {jp:"Bar Goya",en:"Bar Goya",ward:"中央区",area:"Ginza",types:["B"],smoke:false,open:[[19,26]],sound:"JBL 4344",cover:"¥2000",order:"Cocktail",about:"Spanish art, Japanese precision. Hard-bop selection, cocktail menu that took an hour to decide."},
+  {jp:"ふくろう",en:"Fukurou",ward:"中央区",area:"Nihombashi",types:["B"],smoke:true,open:[[18,25]],sound:"Altec",cover:"¥800",order:"Highball",about:"Owl-themed, business district hideaway. After-work suits, vintage Blue Note, last train clientele."},
+  {jp:"Tokyo TUC",en:"Tokyo TUC",ward:"中央区",area:"Iwamotocho",types:["L"],smoke:false,open:[[18.5,23]],sound:"Live acoustic",cover:"¥5000",order:"Set menu",about:"Iwamotocho hidden room, big-name Japanese players, dinner-included sets."},
+
+  // ----- Setagaya / Meguro / Shinagawa -----
+  {jp:"Mister Kelly's",en:"Mister Kelly's",ward:"目黒区",area:"Meguro",types:["L"],smoke:false,open:[[18,23]],sound:"Live acoustic",cover:"¥5500",order:"Set menu",about:"Sister to the Osaka original. Vocal jazz showcase, two sets, dinner before the music starts."},
+  {jp:"GINZA SWING",en:"Swing Ebisu",ward:"渋谷区",area:"Ebisu",types:["B","L"],smoke:false,open:[[19,25]],sound:"JBL 4344",cover:"¥1200",order:"Wine",about:"Ebisu adult-jazz, pre-1960 vocal albums, lit by candles and table lamps."},
+  {jp:"YENBOOKS",en:"Yenbooks Cafe",ward:"目黒区",area:"Nakameguro",types:["K","D"],smoke:false,open:[[12,21]],sound:"Vintage Marantz",cover:"None",order:"Coffee + cake",about:"Bookshop-cafe hybrid by the canal. Pre-war jazz, paperbacks, three tables and one window."},
+  {jp:"GORO",en:"Goro",ward:"世田谷区",area:"Sangenjaya",types:["K","D"],smoke:false,open:[[12,22]],sound:"Tannoy GRF",cover:"None",order:"Coffee",about:"Sangenjaya hideout, owner Goro-san spins from a wall of LPs, grandfather clock ticking under the music."},
+  {jp:"audio bar Stereo",en:"Stereo",ward:"世田谷区",area:"Shimokitazawa",types:["B"],smoke:false,open:[[19,27]],sound:"Mcintosh + JBL",cover:"¥700",order:"Beer",about:"Shimokita basement, audiophile bar, switches between jazz, rock, dub, ambient depending on the room's mood."},
+  {jp:"Mona Records",en:"Mona Records",ward:"世田谷区",area:"Shimokitazawa",types:["L","K","D"],smoke:false,open:[[12,23]],sound:"Live + PA",cover:"Live ¥2500",order:"Coffee or beer",about:"Cafe by day, intimate live room by night. Folk-jazz crossover crowd."},
+  {jp:"音響ハウス",en:"Onkyo House",ward:"世田谷区",area:"Sangenjaya",types:["B"],smoke:false,open:[[20,28]],sound:"Custom horn",cover:"¥1000",order:"House sake",about:"Audio nerd's bar, custom horn loudspeakers, sake list curated by the master."},
+  {jp:"Bar Subterraneans",en:"Subterraneans",ward:"世田谷区",area:"Shimokitazawa",types:["B"],smoke:true,open:[[20,28]],sound:"Vintage tube",cover:"¥800",order:"Whisky",about:"Beat-poet basement vibes, Kerouac on the wall, hard bop on the platter."},
+
+  // ----- Suginami / Kichijoji / Nakano -----
+  {jp:"メグ",en:"Meg",ward:"武蔵野市",area:"Kichijoji",types:["K","D"],smoke:false,star:true,open:[[12,22]],sound:"JBL Paragon",cover:"None",order:"Coffee",about:"Master Terashima Yasukuni's home turf. Author, critic, lifelong listener. The selection runs deep into the avant-garde."},
+  {jp:"sometime",en:"Sometime",ward:"武蔵野市",area:"Kichijoji",types:["L","B"],smoke:false,open:[[17.5,23.5]],sound:"Live acoustic",cover:"¥1700",order:"Drink minimum",about:"Kichijoji live institution since 1975. Working trios, vocal showcases, no fuss."},
+  {jp:"FUNKY",en:"Funky",ward:"武蔵野市",area:"Kichijoji",types:["B"],smoke:true,open:[[19,28]],sound:"Klipsch",cover:"¥500",order:"Highball",about:"Soul-jazz, funk-jazz, the seventies in a room. Tight space, loud system, regulars who dance in their seats."},
+  {jp:"A&amp;F",en:"A&amp;F",ward:"武蔵野市",area:"Kichijoji",types:["B","K"],smoke:false,open:[[14,24]],sound:"Tannoy",cover:"None",order:"Coffee or whisky",about:"All-afternoon-into-evening room. Slow shift from drip coffee to single malt."},
+  {jp:"Bar BAR BAR",en:"Bar Bar Bar",ward:"中野区",area:"Nakano",types:["B"],smoke:false,open:[[19,26]],sound:"JBL 4344",cover:"¥1000",order:"Cocktail",about:"Nakano hidden gem, master used to produce Japanese fusion records, deep selection."},
+  {jp:"Jirokichi",en:"Jirokichi",ward:"中野区",area:"Nakano",types:["L"],smoke:false,open:[[18.5,23]],sound:"Live acoustic",cover:"¥3500",order:"Drink minimum",about:"Long-running Nakano live house, blues-rock-jazz blur, working musicians' favourite."},
+  {jp:"Bird",en:"Bird",ward:"杉並区",area:"Koenji",types:["B"],smoke:true,open:[[19,28]],sound:"Altec",cover:"¥600",order:"Highball",about:"Koenji underground, bebop only, small room, big selection."},
+
+  // ----- Toshima / Bunkyo / Taito -----
+  {jp:"Eastworks",en:"Eastworks",ward:"豊島区",area:"Ikebukuro",types:["B","K"],smoke:false,open:[[15,25]],sound:"Vintage Marantz",cover:"None",order:"Coffee or wine",about:"Ikebukuro third-floor hideaway, all-day open, slow shift from cafe to bar."},
+  {jp:"In F",en:"In F",ward:"豊島区",area:"Ikebukuro",types:["L"],smoke:false,open:[[19,23]],sound:"Live acoustic",cover:"¥2500",order:"Drink minimum",about:"West Ikebukuro live house, mainstream working bands, friendly crowd."},
+  {jp:"Apollo",en:"Apollo",ward:"豊島区",area:"Ikebukuro",types:["K","D"],smoke:false,open:[[11,21]],sound:"JBL 4344",cover:"None",order:"Curry coffee set",about:"Lunch-and-listen kissa, weekday salaryman crowd, Sunday afternoon dads."},
+  {jp:"YAMAHA",en:"Yamaha Ginza Studio",ward:"中央区",area:"Ginza",types:["L"],smoke:false,open:[[19,22]],sound:"Live acoustic",cover:"¥3500",order:"Ticket only",about:"Concert-room formal, no food no drink, music as the only dish."},
+  {jp:"曙",en:"Akebono",ward:"文京区",area:"Hongo",types:["K","D"],smoke:false,open:[[12,21]],sound:"Tannoy",cover:"None",order:"Coffee",about:"University-district kissa, professors and students, jazz on the platter, philosophy on the table."},
+  {jp:"BUDDY",en:"Buddy",ward:"練馬区",area:"Ekoda",types:["L"],smoke:false,open:[[19,23]],sound:"Live acoustic",cover:"¥2500",order:"Drink minimum",about:"Ekoda live institution since 1980. Tight room, working musicians' weeknight."},
+
+  // ----- East Tokyo: Sumida / Koto / Edogawa -----
+  {jp:"Hot House",en:"Hot House",ward:"墨田区",area:"Kinshicho",types:["L"],smoke:false,open:[[19,23]],sound:"Live acoustic",cover:"¥3000",order:"Drink minimum",about:"East-side live house, far from the tourist circuit, real working-musician crowd."},
+  {jp:"Sound Stream",en:"Sound Stream",ward:"江東区",area:"Kiba",types:["B"],smoke:false,open:[[19,26]],sound:"Vintage tube",cover:"¥800",order:"Wine",about:"Kiba waterfront warehouse-bar, slow groove and modal jazz, Sunday afternoon listening sessions."},
+  {jp:"Kayabacho Cay",en:"Cay",ward:"中央区",area:"Kayabacho",types:["B","L"],smoke:false,open:[[19,27]],sound:"Custom horn",cover:"¥1500",order:"Cocktail",about:"Old warehouse converted, big speakers, occasional live electronics."},
+  {jp:"音音",en:"Otooto",ward:"江東区",area:"Monzen-Nakacho",types:["K","D"],smoke:false,open:[[12,20]],sound:"JBL 4343",cover:"None",order:"Hand drip",about:"Monzen-Nakacho temple-district kissa, daytime only, perfect for a Sunday."},
+
+  // ----- North Tokyo: Asakusa / Ueno -----
+  {jp:"OYSTER",en:"Oyster",ward:"台東区",area:"Asakusa",types:["B","L"],smoke:true,open:[[18,25]],sound:"Vintage Altec",cover:"¥1200",order:"Sake",about:"Asakusa under the Tobu line, oysters and bebop, locals and stray foreigners who got lucky."},
+  {jp:"BAR FAGINS",en:"Bar Fagin's",ward:"台東区",area:"Ueno",types:["B"],smoke:true,open:[[19,27]],sound:"JBL 4350",cover:"¥800",order:"Whisky",about:"Ueno old-school, salaryman crowd, Coltrane until the master gets bored, then Mingus."},
+  {jp:"音楽喫茶 茶廊",en:"Saro",ward:"台東区",area:"Yanaka",types:["K","D"],smoke:false,open:[[11,19]],sound:"Tannoy",cover:"None",order:"Matcha set",about:"Yanaka old-town, tatami floor, jazz on traditional speakers in a former machiya house."},
+
+  // ----- West Tokyo (Tama area) -----
+  {jp:"NO TRUNKS",en:"No Trunks",ward:"国分寺市",area:"Kokubunji",types:["L","K","D"],smoke:false,open:[[12,23]],sound:"Live + Altec",cover:"Live ¥2500",order:"Coffee or beer",about:"Kokubunji long-runner, daytime kissa, evening live trios, weekend marathon sessions."},
+  {jp:"BIGGS",en:"Biggs",ward:"国立市",area:"Kunitachi",types:["B","K"],smoke:false,open:[[14,25]],sound:"Vintage JBL",cover:"None",order:"Coffee or whisky",about:"University-town slow-burn, all-afternoon-and-evening room, students and teachers and serious listeners."},
+  {jp:"GOOD CAFE",en:"Good Cafe",ward:"国立市",area:"Kunitachi",types:["K","D"],smoke:false,open:[[10,20]],sound:"JBL Olympus",cover:"None",order:"Cake set",about:"Kunitachi quiet-street kissa, daytime only, the kind of place reading a novel takes four hours."},
+  {jp:"TAMA",en:"Tama",ward:"立川市",area:"Tachikawa",types:["B"],smoke:true,open:[[19,27]],sound:"Tannoy",cover:"¥600",order:"Highball",about:"Tachikawa old-school, far west, regulars who've been showing up since the seventies."},
+  {jp:"音楽舎",en:"Ongaku-sha",ward:"三鷹市",area:"Mitaka",types:["K","D"],smoke:false,open:[[11,21]],sound:"Tannoy GRF",cover:"None",order:"Coffee",about:"Mitaka quiet-residential kissa, master is also a violin restorer."},
+
+  // ----- South Tokyo -----
+  {jp:"DOLPHY",en:"Dolphy",ward:"大田区",area:"Kamata",types:["B"],smoke:true,open:[[19,26]],sound:"JBL 4343",cover:"¥800",order:"Whisky",about:"Kamata working-class district, free-jazz devotion, Eric Dolphy on rotation."},
+  {jp:"Jazz Spot Intro",en:"Intro",ward:"品川区",area:"Gotanda",types:["L","B"],smoke:false,open:[[19,25]],sound:"Live acoustic",cover:"¥3000",order:"Drink minimum",about:"Gotanda underground, jam-session policy, working musicians drop in unannounced."},
+  {jp:"Bar Sound",en:"Sound",ward:"品川区",area:"Osaki",types:["B"],smoke:false,open:[[19,26]],sound:"Vintage Marantz",cover:"¥1000",order:"Cocktail",about:"Osaki business-district hideout, vinyl-only policy, no requests, ever."},
+
+  // ----- Kichijoji extras / Mitaka -----
+  {jp:"Bar Track",en:"Bar Track",ward:"武蔵野市",area:"Kichijoji",types:["B"],smoke:false,open:[[20,27]],sound:"Klipschorn",cover:"¥600",order:"Beer",about:"Kichijoji late-night hideout, owner is a working drummer, selection skews fusion and crossover."},
+
+  // ----- Aoyama / Harajuku extras -----
+  {jp:"NEW HOUSE",en:"New House",ward:"渋谷区",area:"Aoyama",types:["B"],smoke:false,open:[[19,27]],sound:"Genelec",cover:"¥1500",order:"Natural wine",about:"Aoyama new-school listening room, broad-church selection, wine list as serious as the records."},
+  {jp:"Forestlimit",en:"Forestlimit",ward:"渋谷区",area:"Hatagaya",types:["B","L"],smoke:false,open:[[20,28]],sound:"PA system",cover:"¥1500",order:"Beer",about:"Hatagaya basement, jazz-meets-electronic crossover crowd, occasional live."},
+
+  // ----- Ginza extras -----
+  {jp:"Bar Tender",en:"Bar Tender",ward:"中央区",area:"Ginza",types:["B"],smoke:false,open:[[18,25]],sound:"Tannoy",cover:"¥1500",order:"Cocktail",about:"Ginza eighth-floor, classic-cocktail bar with a serious jazz selection on the side."},
+
+  // ----- Misc curated -----
+  {jp:"Sound Bar 1968",en:"Sound Bar 1968",ward:"渋谷区",area:"Shibuya",types:["B"],smoke:true,open:[[19,28]],sound:"JBL 4350",cover:"¥800",order:"Whisky",about:"Single-year devotion. Only records released in 1968. Master will explain why."},
+  {jp:"COFFEE BAR JAZZ",en:"Coffee Bar Jazz",ward:"新宿区",area:"Yotsuya",types:["K","B","D"],smoke:false,open:[[11,24]],sound:"Tannoy GRF",cover:"None",order:"Coffee or beer",about:"All-day Yotsuya kissa-bar, slow shift from morning coffee to evening single malts."},
+  {jp:"Bar Gentle",en:"Gentle",ward:"渋谷区",area:"Daikanyama",types:["B"],smoke:false,open:[[19,26]],sound:"Custom horn",cover:"¥1500",order:"Wine",about:"Daikanyama hidden lane, refined adult crowd, ECM and Manfred Eicher worship."},
+  {jp:"Café 月夜と仔猫",en:"Tsukiyo to Koneko",ward:"杉並区",area:"Asagaya",types:["L","K","D"],smoke:false,open:[[12,23]],sound:"Live + Altec",cover:"Live ¥2000",order:"Coffee",about:"Asagaya cafe-by-day, live-by-night, vocal jazz showcase room with a real piano."},
+  {jp:"Bar Catfish",en:"Catfish",ward:"目黒区",area:"Gakugei-Daigaku",types:["B"],smoke:true,open:[[20,27]],sound:"JBL 4344",cover:"¥600",order:"Whisky",about:"Gakugei-Daigaku station-side, hard-bop and Mingus, salaryman late-night refuge."},
+  {jp:"Bar Cleo",en:"Cleo",ward:"渋谷区",area:"Ebisu",types:["B"],smoke:false,open:[[18,26]],sound:"Tannoy Westminster",cover:"¥1500",order:"Cocktail",about:"Ebisu refined room, vocal jazz, Cleo Laine on the wall, real silver shaker behind the bar."}
+];
+
+// SVG positions for each venue (rough geography aligned to Yamanote)
+const positions = {
+  "Yotsuya":[510,290],"Jimbocho":[565,235],"Kanda":[580,210],
+  "Shinjuku":[420,225],"Shibuya":[480,365],"Ebisu":[555,395],
+  "Minami-Aoyama":[535,360],"Roppongi":[580,395],"Shimbashi":[635,330],
+  "Ginza":[635,295],"Nihombashi":[640,250],"Iwamotocho":[615,235],
+  "Meguro":[555,440],"Sangenjaya":[395,420],"Shimokitazawa":[365,335],
+  "Kichijoji":[245,290],"Nakano":[345,275],"Koenji":[320,265],
+  "Ikebukuro":[460,150],"Hongo":[565,170],"Ekoda":[395,150],
+  "Kinshicho":[820,200],"Kiba":[785,295],"Kayabacho":[710,260],
+  "Monzen-Nakacho":[800,330],"Asakusa":[695,135],"Ueno":[640,170],
+  "Yanaka":[620,150],"Kokubunji":[140,335],"Kunitachi":[125,355],
+  "Tachikawa":[80,310],"Mitaka":[200,295],"Kamata":[605,485],
+  "Gotanda":[565,420],"Osaki":[565,440],"Aoyama":[510,365],
+  "Hatagaya":[395,310],"Daikanyama":[510,395],"Asagaya":[295,265],
+  "Gakugei-Daigaku":[505,460],"Nakameguro":[530,420]
+};
+
+/* =========================================================
+   STATE
+   ========================================================= */
+let state = {
+  mode: "day",          // day | night | both
+  filter: "all",        // all | kissa | live | bar | daytime | star
+  view: "map",          // map | all
+  selected: null
+};
+
+/* =========================================================
+   LOGIC
+   ========================================================= */
+function isOpenNow(venue, mode){
+  // Daylight and Nocturne show identical venue sets — they are visual themes, not filters.
+  // Filtering by type happens via the filter buttons.
+  return true;
+}
+
+function passesFilter(venue, filter){
+  if(filter === "all") return true;
+  if(filter === "kissa") return venue.types.includes("K");
+  if(filter === "live") return venue.types.includes("L");
+  if(filter === "bar") return venue.types.includes("B");
+  if(filter === "daytime") return venue.types.includes("D");
+  return true;
+}
+
+function visibleVenues(){
+  return venues.filter(v => isOpenNow(v, state.mode) && passesFilter(v, state.filter));
+}
+
+function dotClass(v){
+  // priority: K (kissa) overrides B (bar). If both, show kissa-style.
+  return v.types.includes("K") ? "kissa" : "bar";
+}
+
+/* =========================================================
+   RENDER
+   ========================================================= */
+function renderDots(){
+  const g = document.getElementById("dots");
+  g.innerHTML = "";
+  const visible = new Set(visibleVenues().map(v => v.en));
+
+  venues.forEach((v, i) => {
+    const pos = positions[v.area];
+    if(!pos) return;
+    const [x,y] = pos;
+    // jitter so overlapping venues in same area don't fully overlap
+    const seed = (v.en.charCodeAt(0) + v.en.length * 7) % 20;
+    const jx = ((seed % 5) - 2) * 4;
+    const jy = ((Math.floor(seed/5)) - 2) * 4;
+
+    const c = document.createElementNS("http://www.w3.org/2000/svg","circle");
+    c.setAttribute("cx", x + jx);
+    c.setAttribute("cy", y + jy);
+    c.setAttribute("r", 4);
+    let cls = "dot " + dotClass(v);
+    if(v.star) cls += " starred";
+    if(!visible.has(v.en)) cls += " dim";
+    if(state.selected === v.en) cls += " active";
+    c.setAttribute("class", cls);
+    c.addEventListener("click", () => selectVenue(v.en));
+    c.addEventListener("mouseenter", () => {
+      // optional preview
+    });
+    g.appendChild(c);
+  });
+}
+
+function renderRows(){
+  const visible = visibleVenues();
+  document.getElementById("count").textContent = visible.length;
+  const rowsEl = document.getElementById("rows");
+  rowsEl.innerHTML = "";
+  visible.forEach(v => {
+    const row = document.createElement("div");
+    row.className = "row" + (state.selected === v.en ? " active" : "");
+    row.innerHTML = `
+      <div class="place-cell">
+        <span class="star">${v.star ? "★" : ""}</span>
+        <span class="jp-name">${v.jp}</span>
+        <span class="en-name">${v.en}</span>
+      </div>
+      <div class="ward">${v.ward}</div>
+      <div class="types">
+        ${v.types.includes("K") ? '<span class="tag">K</span>' : ''}
+        ${v.types.includes("L") ? '<span class="tag live">Live</span>' : ''}
+        ${v.types.includes("B") ? '<span class="tag">B</span>' : ''}
+        ${v.types.includes("D") ? '<span class="tag">D</span>' : ''}
+      </div>
+      <div class="smoke">${v.smoke ? '<span class="air-icon smoking">⊘</span>' : '<span class="air-icon clean">✓</span>'}</div>
+    `;
+    row.addEventListener("click", () => selectVenue(v.en));
+    rowsEl.appendChild(row);
+  });
+}
+
+function renderDetail(){
+  const el = document.getElementById("detail");
+  if(!state.selected){
+    el.innerHTML = '<div class="detail-empty">Select a venue to view details.</div>';
+    return;
+  }
+  const v = venues.find(x => x.en === state.selected);
+  if(!v){ el.innerHTML = '<div class="detail-empty">Not found.</div>'; return }
+
+  const openText = v.open.map(([a,b]) => {
+    const fmt = h => {
+      const hr = Math.floor(h % 24);
+      const m = Math.round((h % 1) * 60);
+      return `${String(hr).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
+    };
+    return `${fmt(a)} — ${fmt(b)}`;
+  }).join(", ");
+
+  const typeLabels = {K:"Kissa",L:"Live",B:"Bar",D:"Daytime"};
+  const pills = v.types.map(t => `<span class="pill on">${typeLabels[t]}</span>`).join("");
+
+  // Generate Aesop-style placeholder collage based on venue characteristics
+  const seed = v.en.charCodeAt(0) + v.en.length;
+  const isKissa = v.types.includes("K");
+  const isBar = v.types.includes("B");
+  const isLive = v.types.includes("L");
+  const collageVariant = seed % 4;
+
+  const palettes = [
+    ['#8a6a3a','#5a3a20','#c9a878'],
+    ['#3a2a1a','#7a4a2a','#a87a4a'],
+    ['#5a3a20','#a8804a','#d4b078'],
+    ['#2a1a10','#6a4a2a','#b8905a']
+  ];
+  const p = palettes[seed % 4];
+
+  // Three different collage layouts — Aesop-inspired asymmetric
+  const collages = [
+    // Layout A: large left + two stacked right
+    `<div class="collage layout-a">
+      <div class="img img-1" style="background:linear-gradient(135deg,${p[0]},${p[1]});">
+        ${isKissa ? '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="35" fill="none" stroke="rgba(255,240,210,0.25)" stroke-width="0.5"/><circle cx="50" cy="50" r="25" fill="none" stroke="rgba(255,240,210,0.2)" stroke-width="0.4"/><circle cx="50" cy="50" r="15" fill="none" stroke="rgba(255,240,210,0.15)" stroke-width="0.4"/><circle cx="50" cy="50" r="5" fill="rgba(255,240,210,0.3)"/></svg>' : '<svg viewBox="0 0 100 100"><line x1="20" y1="80" x2="80" y2="20" stroke="rgba(255,240,210,0.2)" stroke-width="0.5"/><line x1="20" y1="60" x2="80" y2="40" stroke="rgba(255,240,210,0.15)" stroke-width="0.4"/><line x1="20" y1="40" x2="80" y2="60" stroke="rgba(255,240,210,0.15)" stroke-width="0.4"/></svg>'}
+      </div>
+      <div class="img img-2" style="background:linear-gradient(180deg,${p[1]},${p[2]});"></div>
+      <div class="img img-3" style="background:linear-gradient(45deg,${p[2]},${p[0]});"></div>
+    </div>`,
+    // Layout B: top wide + two below
+    `<div class="collage layout-b">
+      <div class="img img-1" style="background:linear-gradient(90deg,${p[1]},${p[0]});">
+        <svg viewBox="0 0 200 60"><line x1="20" y1="30" x2="180" y2="30" stroke="rgba(255,240,210,0.2)" stroke-width="0.4"/><circle cx="100" cy="30" r="10" fill="none" stroke="rgba(255,240,210,0.3)" stroke-width="0.5"/></svg>
+      </div>
+      <div class="img img-2" style="background:linear-gradient(135deg,${p[2]},${p[1]});"></div>
+      <div class="img img-3" style="background:linear-gradient(225deg,${p[0]},${p[2]});"></div>
+    </div>`,
+    // Layout C: offset diagonal
+    `<div class="collage layout-c">
+      <div class="img img-1" style="background:linear-gradient(135deg,${p[0]},${p[2]});">
+        <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,240,210,0.2)" stroke-width="0.4"/></svg>
+      </div>
+      <div class="img img-2" style="background:linear-gradient(90deg,${p[1]},${p[0]});"></div>
+    </div>`,
+    // Layout D: triptych
+    `<div class="collage layout-d">
+      <div class="img img-1" style="background:linear-gradient(180deg,${p[0]},${p[1]});"></div>
+      <div class="img img-2" style="background:linear-gradient(180deg,${p[1]},${p[2]});">
+        <svg viewBox="0 0 100 200"><line x1="50" y1="20" x2="50" y2="180" stroke="rgba(255,240,210,0.2)" stroke-width="0.4"/></svg>
+      </div>
+      <div class="img img-3" style="background:linear-gradient(180deg,${p[2]},${p[0]});"></div>
+    </div>`
+  ];
+
+  // Google Maps search query: venue name + ward + Tokyo
+  const mapsQuery = encodeURIComponent(`${v.en} ${v.jp} ${v.ward} 東京`);
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
+
+  el.innerHTML = `
+    <div class="detail-loc">
+      <span class="jp">${v.ward}</span> · ${v.area.toUpperCase()}
+    </div>
+    <h2>${v.en}</h2>
+    <div class="alt-name">${v.jp}${v.star ? '  ·  ★ M' : ''}</div>
+
+    ${collages[collageVariant]}
+
+    <div class="pills">${pills}</div>
+
+    <div class="section">
+      <h3>About</h3>
+      <p class="about">${v.about}</p>
+    </div>
+
+    <div class="section">
+      <h3>Details</h3>
+      <div class="meta-grid">
+        <div><div class="k">Sound</div>${v.sound}</div>
+        <div><div class="k">Hours</div>${openText}</div>
+        <div><div class="k">Cover</div>${v.cover}</div>
+        <div><div class="k">Order</div>${v.order}</div>
+        <div><div class="k">Air</div>${v.smoke ? "Smoking allowed" : "Non-smoking"}</div>
+        <div><div class="k">Area</div>${v.area}</div>
+      </div>
+    </div>
+
+    <a class="maps-link" href="${mapsUrl}" target="_blank" rel="noopener noreferrer">
+      View on Google Maps
+      <span class="arrow">↗</span>
+    </a>
+  `;
+}
+
+function selectVenue(en){
+  state.selected = state.selected === en ? null : en;
+  renderDots();
+  renderRows();
+  renderDetail();
+}
+
+function setMode(mode){
+  state.mode = mode;
+  document.querySelectorAll(".mode-toggle button").forEach(b => b.classList.remove("active"));
+  document.getElementById("mode-" + mode).classList.add("active");
+  document.body.classList.remove("night");
+  if(mode === "night") document.body.classList.add("night");
+  renderDots();
+  renderRows();
+}
+
+function setFilter(filter){
+  state.filter = filter;
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.toggle("active", b.dataset.filter === filter));
+  renderDots();
+  renderRows();
+}
+
+function setView(view){
+  state.view = view;
+  document.querySelectorAll(".view-btn").forEach(b => b.classList.toggle("active", b.dataset.view === view));
+  document.getElementById("map-section").style.display = (view === "map") ? "" : "none";
+}
+
+/* =========================================================
+   BIND
+   ========================================================= */
+document.getElementById("mode-day").addEventListener("click", () => setMode("day"));
+document.getElementById("mode-night").addEventListener("click", () => setMode("night"));
+
+document.querySelectorAll(".filter-btn").forEach(b => {
+  b.addEventListener("click", () => setFilter(b.dataset.filter));
+});
+document.querySelectorAll(".view-btn").forEach(b => {
+  b.addEventListener("click", () => setView(b.dataset.view));
+});
+document.getElementById("reset-btn").addEventListener("click", () => {
+  state.selected = null;
+  setFilter("all");
+});
+
+// Init: default to Daylight; user can switch
+(function init(){
+  setMode("day");
+  renderDetail();
+})();
+
+/* =========================================================
+   VINYL LOADER — manual click to enter
+   ========================================================= */
+document.getElementById("loader-enter").addEventListener("click", () => {
+  document.getElementById("loader").classList.add("gone");
+});
+
+/* =========================================================
+   JAZZ FM PLAYER
+   Public domain 78rpm jazz tracks from Internet Archive.
+   All recordings pre-1929, in U.S. public domain.
+   ========================================================= */
+const fmTracks = [
+  {
+    title: "Dipper Mouth Blues — King Oliver's Jazz Band (1923)",
+    src: "https://archive.org/download/78_dippermouth-blues_king-olivers-jazz-band_gbia0011094b/Dippermouth%20Blues%20-%20King%20Olivers%20Jazz%20Band.mp3"
+  },
+  {
+    title: "West End Blues — Louis Armstrong (1928)",
+    src: "https://archive.org/download/78_west-end-blues_louis-armstrong-and-his-hot-five-clarence-williams_gbia0011094a/West%20End%20Blues%20-%20Louis%20Armstrong%20and%20his%20Hot%20Five.mp3"
+  },
+  {
+    title: "Black and Tan Fantasy — Duke Ellington (1927)",
+    src: "https://archive.org/download/78_black-and-tan-fantasy_duke-ellington-and-his-orchestra-bubber-miley-duke-ell_gbia0001317a/Black%20and%20Tan%20Fantasy%20-%20Duke%20Ellington%20and%20his%20Orchestra.mp3"
+  },
+  {
+    title: "Singin' the Blues — Frankie Trumbauer & Bix Beiderbecke (1927)",
+    src: "https://archive.org/download/78_singin-the-blues_frank-trumbauer-and-his-orchestra-with-bix-beiderbecke-rob_gbia0001317b/Singin%20the%20Blues%20-%20Frank%20Trumbauer%20and%20his%20Orchestra.mp3"
+  },
+  {
+    title: "Heebie Jeebies — Louis Armstrong & His Hot Five (1926)",
+    src: "https://archive.org/download/78_heebie-jeebies_louis-armstrong-and-his-hot-five_gbia0011094c/Heebie%20Jeebies%20-%20Louis%20Armstrong%20and%20his%20Hot%20Five.mp3"
+  },
+  {
+    title: "St. Louis Blues — Bessie Smith (1925)",
+    src: "https://archive.org/download/78_st-louis-blues_bessie-smith-louis-armstrong-fred-longshaw-w-c-handy_gbia0001317c/St%20Louis%20Blues%20-%20Bessie%20Smith.mp3"
+  },
+  {
+    title: "Charleston — Paul Whiteman (1925)",
+    src: "https://archive.org/download/78_charleston_paul-whiteman-and-his-orchestra-cecil-mack-jimmy-johnson_gbia0001317d/Charleston%20-%20Paul%20Whiteman.mp3"
+  }
+];
+
+(function fmPlayer(){
+  const audio = document.getElementById("fm-audio");
+  const playBtn = document.getElementById("fm-play");
+  const pauseBtn = document.getElementById("fm-pause");
+  const stopBtn = document.getElementById("fm-stop");
+  const skipBtn = document.getElementById("fm-skip");
+  const minBtn = document.getElementById("fm-min");
+  const trackEl = document.getElementById("fm-track");
+  const vinylEl = document.getElementById("fm-vinyl");
+  const playerEl = document.getElementById("fm-player");
+
+  let idx = Math.floor(Math.random() * fmTracks.length);
+
+  function loadTrack(i){
+    const t = fmTracks[i];
+    audio.src = t.src;
+    trackEl.textContent = t.title;
+  }
+
+  function updateButtonStates(playing){
+    vinylEl.classList.toggle("playing", playing);
+    playBtn.classList.toggle("inactive", playing);
+    pauseBtn.classList.toggle("inactive", !playing);
+  }
+
+  function next(){
+    let n;
+    do { n = Math.floor(Math.random() * fmTracks.length); } while(n === idx && fmTracks.length > 1);
+    idx = n;
+    loadTrack(idx);
+    if(!audio.paused){
+      audio.play().catch(() => updateButtonStates(false));
+    }
+  }
+
+  loadTrack(idx);
+  updateButtonStates(false);
+
+  playBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if(playerEl.classList.contains("collapsed")){
+      playerEl.classList.remove("collapsed");
+      return;
+    }
+    audio.play().then(() => updateButtonStates(true)).catch(() => {
+      trackEl.textContent = "Track unavailable — skipping...";
+      setTimeout(next, 800);
+    });
+  });
+
+  pauseBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    audio.pause();
+    updateButtonStates(false);
+  });
+
+  stopBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    audio.pause();
+    audio.currentTime = 0;
+    updateButtonStates(false);
+    trackEl.textContent = fmTracks[idx].title;
+  });
+
+  skipBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    next();
+  });
+
+  minBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    playerEl.classList.add("collapsed");
+  });
+
+  playerEl.addEventListener("click", () => {
+    if(playerEl.classList.contains("collapsed")){
+      playerEl.classList.remove("collapsed");
+    }
+  });
+
+  audio.addEventListener("ended", next);
+  audio.addEventListener("error", () => {
+    trackEl.textContent = "Track unavailable — trying next...";
+    setTimeout(next, 1000);
+  });
+  audio.addEventListener("playing", () => updateButtonStates(true));
+  audio.addEventListener("pause", () => updateButtonStates(false));
+})();
+</script>
+</body>
+</html>
