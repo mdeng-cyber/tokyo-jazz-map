@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Shippori+Mincho:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://w.soundcloud.com/player/api.js"></script>
 <style>
   :root{
     --paper:#efe9dc;
@@ -186,10 +187,54 @@
   .dot.bar{fill:var(--bar);stroke:var(--ink-soft);stroke-width:0.5}
   body.night .dot.bar{fill:var(--bar);stroke:none}
   body.night .dot.kissa{fill:var(--kissa)}
-  .dot.starred{stroke:var(--accent);stroke-width:1.5}
   .dot:hover{r:6}
   .dot.dim{opacity:0.12}
-  .dot.active{r:7;stroke:var(--accent);stroke-width:2}
+
+  /* Active dot — bright accent, larger */
+  .dot.active-dot{
+    fill:var(--accent);
+    stroke:var(--paper);
+    stroke-width:1.5;
+    cursor:pointer;
+    filter:drop-shadow(0 0 4px var(--accent));
+    animation:dot-pulse 2s ease-in-out infinite;
+  }
+  @keyframes dot-pulse{
+    0%,100%{r:5.5}
+    50%{r:6.5}
+  }
+
+  /* Spotlight halos — three concentric layers for depth */
+  .spotlight-halo-1{
+    fill:var(--accent);
+    opacity:0.25;
+    pointer-events:none;
+    animation:halo-pulse-1 2s ease-in-out infinite;
+  }
+  .spotlight-halo-2{
+    fill:var(--accent);
+    opacity:0.12;
+    pointer-events:none;
+    animation:halo-pulse-2 2.4s ease-in-out infinite;
+  }
+  .spotlight-halo-3{
+    fill:var(--accent);
+    opacity:0.05;
+    pointer-events:none;
+    animation:halo-pulse-3 2.8s ease-in-out infinite;
+  }
+  @keyframes halo-pulse-1{
+    0%,100%{opacity:0.22;r:9}
+    50%{opacity:0.32;r:11}
+  }
+  @keyframes halo-pulse-2{
+    0%,100%{opacity:0.1;r:17}
+    50%{opacity:0.16;r:20}
+  }
+  @keyframes halo-pulse-3{
+    0%,100%{opacity:0.04;r:30}
+    50%{opacity:0.08;r:34}
+  }
 
   .label-text{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;fill:var(--ink-soft);pointer-events:none}
   .yamanote{fill:none;stroke:var(--ink-soft);stroke-width:0.6;stroke-dasharray:2 2;opacity:0.55}
@@ -208,6 +253,16 @@
 
   .table-wrap{border-right:var(--hairline) solid var(--line);overflow:hidden}
   body.night .table-wrap{border-right-color:var(--line)}
+
+  .detail{
+    position:sticky;
+    top:0;
+    align-self:start;
+    max-height:100vh;
+    overflow-y:auto;
+  }
+  .detail-inner{padding:40px}
+  .detail-empty{color:var(--ink-soft);font-style:italic;font-size:14px}
 
   .thead{
     display:grid;
@@ -250,15 +305,6 @@
   .row.hidden{display:none}
 
   /* ============ DETAIL PANE ============ */
-  .detail{
-    padding:40px;
-    position:sticky;
-    top:0;
-    align-self:start;
-    max-height:100vh;
-    overflow-y:auto;
-  }
-  .detail-empty{color:var(--ink-soft);font-style:italic;font-size:14px}
   .detail-loc{font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:20px}
   .detail-loc .jp{font-family:'Shippori Mincho',serif;letter-spacing:0.15em;color:var(--ink)}
   .detail h2{
@@ -275,51 +321,6 @@
     margin-bottom:24px;
   }
   .detail .pills{display:flex;gap:6px;margin-bottom:28px}
-
-  /* ============ COLLAGE ============ */
-  .collage{
-    display:grid;
-    gap:8px;
-    margin:24px 0 28px;
-    width:100%;
-  }
-  .collage .img{
-    position:relative;overflow:hidden;
-    border:var(--hairline) solid var(--line);
-    filter:saturate(0.6) contrast(0.95);
-    transition:filter 0.4s ease;
-  }
-  .collage .img:hover{filter:saturate(0.85) contrast(1)}
-  .collage .img svg{position:absolute;inset:0;width:100%;height:100%}
-
-  .collage.layout-a{
-    grid-template-columns:1.5fr 1fr;
-    grid-template-rows:1fr 1fr;
-    height:280px;
-  }
-  .collage.layout-a .img-1{grid-row:1 / 3}
-  .collage.layout-a .img-3{transform:translateY(8px)}
-
-  .collage.layout-b{
-    grid-template-columns:1fr 1fr;
-    grid-template-rows:1.4fr 1fr;
-    height:300px;
-  }
-  .collage.layout-b .img-1{grid-column:1 / 3}
-  .collage.layout-b .img-3{transform:translateX(-6px)}
-
-  .collage.layout-c{
-    grid-template-columns:1fr 1.3fr;
-    height:240px;
-  }
-  .collage.layout-c .img-1{transform:translateY(12px)}
-
-  .collage.layout-d{
-    grid-template-columns:1fr 1.4fr 1fr;
-    height:260px;
-  }
-  .collage.layout-d .img-1{transform:translateY(20px)}
-  .collage.layout-d .img-3{transform:translateY(-12px)}
 
   /* ============ MAPS LINK ============ */
   .maps-link{
@@ -400,16 +401,22 @@
     gap:40px;
   }
   .vinyl-loader.gone{opacity:0;visibility:hidden;pointer-events:none}
+
+  .turntable{
+    position:relative;
+    width:260px;height:260px;
+  }
   .loader-vinyl{
     width:180px;height:180px;border-radius:50%;
+    position:absolute;left:40px;top:40px;
     background:radial-gradient(circle,
       #2a1a10 0%,#0a0806 14%,#1a1410 18%,#0a0806 22%,#1a1410 26%,
       #0a0806 30%,#1a1410 34%,#0a0806 38%,#1a1410 42%,#0a0806 46%,
       #1a1410 50%,#0a0806 54%,#1a1410 58%,#0a0806 62%,#1a1410 66%,
       #0a0806 70%,#1a1410 74%,#0a0806 78%,#1a1410 82%,#0a0806 86%,#1a1410 90%);
-    position:relative;
     animation:loader-spin 6s linear infinite;
     box-shadow:0 12px 40px rgba(0,0,0,0.18);
+    transition:box-shadow 0.4s ease;
   }
   .loader-vinyl::before{
     content:"";position:absolute;inset:42%;border-radius:50%;
@@ -419,23 +426,64 @@
     content:"";position:absolute;inset:48%;border-radius:50%;
     background:var(--paper);
   }
+  .loader-vinyl.playing{animation:loader-spin 2.2s linear infinite;box-shadow:0 12px 40px rgba(138,74,42,0.3)}
   @keyframes loader-spin{to{transform:rotate(360deg)}}
+
+  /* Tonearm — display only, no interaction */
+  .tonearm{
+    position:absolute;
+    top:0;left:0;
+    width:260px;height:260px;
+    z-index:5;
+    filter:drop-shadow(2px 4px 6px rgba(0,0,0,0.2));
+    pointer-events:none;
+  }
+
+  /* Play button — the primary music control */
+  .play-cover-btn{
+    background:none;
+    border:1px solid var(--ink);
+    cursor:pointer;
+    padding:14px 32px;
+    font-family:inherit;
+    color:var(--ink);
+    display:flex;align-items:center;gap:14px;
+    transition:all 0.3s ease;
+    margin-top:8px;
+  }
+  .play-cover-btn:hover{
+    background:var(--ink);color:var(--paper);
+  }
+  .play-cover-btn .play-icon{
+    font-size:14px;
+    line-height:1;
+  }
+  .play-cover-btn .play-label{
+    font-family:'Cormorant Garamond',serif;
+    font-style:italic;font-size:18px;
+    letter-spacing:0.02em;
+  }
+  .play-cover-btn.playing{
+    background:var(--ink);color:var(--paper);
+  }
+
   .loader-enter{
     background:none;border:none;cursor:pointer;
-    display:flex;flex-direction:column;align-items:center;gap:10px;
-    padding:16px 28px;
+    display:flex;flex-direction:column;align-items:center;gap:6px;
+    padding:10px 24px;
     font-family:inherit;
     transition:all 0.3s ease;
   }
   .loader-enter:hover{transform:translateY(-2px)}
   .loader-text{
-    font-family:'Cormorant Garamond',serif;font-style:italic;font-size:28px;
-    letter-spacing:0.02em;color:var(--ink);
+    font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;
+    letter-spacing:0.02em;color:var(--ink-soft);
     transition:color 0.3s ease;
   }
   .loader-enter:hover .loader-text{color:var(--accent)}
   .loader-sub{
     font-size:10px;letter-spacing:0.35em;text-transform:uppercase;color:var(--ink-soft);
+    opacity:0.7;
   }
   .loader-foot{
     position:absolute;bottom:32px;
@@ -478,9 +526,65 @@
     .thead,.row{grid-template-columns:2fr 1fr 1fr 0.4fr;font-size:11px}
     .row .en-name{font-size:15px}
     .row .jp-name{font-size:12px}
-    .detail{padding:24px;position:static;max-height:none}
     .map-legend{bottom:20px;left:20px}
     .map-reset{top:20px;right:20px}
+
+    /* Mobile: detail becomes a fullscreen modal */
+    .body-grid{grid-template-columns:1fr}
+    .detail{
+      position:fixed;
+      inset:0;
+      max-height:none;
+      background:var(--paper);
+      z-index:200;
+      padding:0;
+      transform:translateX(100%);
+      transition:transform 0.4s cubic-bezier(0.2,0.8,0.2,1);
+      overflow-y:auto;
+      border-left:none;
+    }
+    .detail.open{transform:translateX(0)}
+    .detail-inner{padding:60px 24px 80px}
+    .detail-empty{display:none}
+    .detail-close{
+      position:fixed;
+      top:16px;right:16px;
+      background:var(--paper-2);
+      border:var(--hairline) solid var(--line);
+      width:40px;height:40px;
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;
+      font-size:18px;color:var(--ink);
+      font-family:inherit;
+      z-index:210;
+      border-radius:50%;
+    }
+    .detail-back{
+      position:fixed;
+      top:16px;left:16px;
+      background:var(--paper-2);
+      border:var(--hairline) solid var(--line);
+      padding:10px 16px;
+      cursor:pointer;
+      font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--ink);
+      font-family:inherit;
+      z-index:210;
+      display:flex;align-items:center;gap:6px;
+    }
+    .fm-player{
+      bottom:12px;right:12px;left:12px;
+      max-width:none;
+      padding:10px 14px;
+    }
+    .fm-info{flex:1;min-width:0}
+    .fm-track{font-size:13px}
+    .fm-controls{gap:4px}
+    .fm-btn{padding:6px}
+  }
+
+  /* Desktop: hide mobile-only close buttons */
+  @media (min-width:761px){
+    .detail-close,.detail-back{display:none}
   }
 </style>
 </head>
@@ -488,11 +592,30 @@
 
 <!-- VINYL LOADER -->
 <div class="vinyl-loader" id="loader">
-  <div class="loader-vinyl"></div>
-  <button class="loader-enter" id="loader-enter">
-    <span class="loader-text">drop the needle</span>
-    <span class="loader-sub">enter ↗</span>
+  <div class="turntable" id="turntable">
+    <div class="loader-vinyl" id="loader-vinyl"></div>
+    <svg class="tonearm" viewBox="0 0 200 200" id="tonearm-svg">
+      <g id="arm-group" transform="rotate(-35 170 30)">
+        <line x1="170" y1="30" x2="60" y2="140" stroke="#3a3028" stroke-width="4" stroke-linecap="round"/>
+        <line x1="170" y1="30" x2="60" y2="140" stroke="#5a4a3a" stroke-width="1.5" stroke-linecap="round"/>
+        <rect x="48" y="132" width="22" height="14" fill="#2a2520" rx="2" stroke="#4a3e30" stroke-width="0.5"/>
+        <circle cx="55" cy="148" r="3" fill="#8a4a2a"/>
+      </g>
+      <circle cx="170" cy="30" r="14" fill="#2a2520" stroke="#4a3e30" stroke-width="1"/>
+      <circle cx="170" cy="30" r="7" fill="#4a3e30"/>
+    </svg>
+  </div>
+
+  <button class="play-cover-btn" id="play-cover-btn" aria-label="Play music">
+    <span class="play-icon" id="play-icon">▶</span>
+    <span class="play-label" id="play-label">drop the needle</span>
   </button>
+
+  <button class="loader-enter" id="loader-enter">
+    <span class="loader-text">enter the map</span>
+    <span class="loader-sub">music continues if playing  ↗</span>
+  </button>
+
   <div class="loader-foot">Tokyo Jazz Map · 2026 · Curated by M</div>
 </div>
 
@@ -534,7 +657,6 @@
     <div class="map-legend">
       <div class="item"><span class="swatch kissa"></span>Kissa / Cafe</div>
       <div class="item"><span class="swatch bar"></span>Bar / Live</div>
-      <div class="item"><span class="star">★</span> M's Pick</div>
     </div>
     <svg id="map-svg" viewBox="0 0 1000 520" preserveAspectRatio="xMidYMid meet">
       <!-- subtle grid -->
@@ -607,17 +729,19 @@
 <div class="fm-player" id="fm-player">
   <div class="fm-vinyl" id="fm-vinyl"></div>
   <div class="fm-info">
-    <div class="fm-label">Now Playing · Jazz FM</div>
+    <div class="fm-label">Jazz FM · SoundCloud</div>
     <div class="fm-track" id="fm-track">Press play to listen</div>
   </div>
   <div class="fm-controls">
     <button class="fm-btn" id="fm-play" title="Play">▶</button>
-    <button class="fm-btn" id="fm-pause" title="Pause">❚❚</button>
-    <button class="fm-btn" id="fm-stop" title="Stop">■</button>
+    <button class="fm-btn inactive" id="fm-pause" title="Pause">❚❚</button>
     <button class="fm-btn" id="fm-skip" title="Next">↻</button>
     <button class="fm-btn fm-min-btn" id="fm-min" title="Minimize">—</button>
   </div>
-  <audio id="fm-audio" preload="none"></audio>
+  <iframe id="sc-iframe"
+    src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/relaxmusicrecords/smooth-jazz-music-elegant-sax-jazz-playlist-for-relax&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&visual=false&buying=false&sharing=false&download=false"
+    style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:none"
+    allow="autoplay"></iframe>
 </div>
 
 <footer>
@@ -808,11 +932,15 @@ function renderDots(){
   g.innerHTML = "";
   const visible = new Set(visibleVenues().map(v => v.en));
 
-  venues.forEach((v, i) => {
+  // First pass: render all non-active dots
+  // Second pass: render active dot last so its glow is on top
+  const activeVenue = state.selected ? venues.find(v => v.en === state.selected) : null;
+
+  venues.forEach((v) => {
+    if(state.selected === v.en) return; // skip, render after
     const pos = positions[v.area];
     if(!pos) return;
     const [x,y] = pos;
-    // jitter so overlapping venues in same area don't fully overlap
     const seed = (v.en.charCodeAt(0) + v.en.length * 7) % 20;
     const jx = ((seed % 5) - 2) * 4;
     const jy = ((Math.floor(seed/5)) - 2) * 4;
@@ -822,16 +950,54 @@ function renderDots(){
     c.setAttribute("cy", y + jy);
     c.setAttribute("r", 4);
     let cls = "dot " + dotClass(v);
-    if(v.star) cls += " starred";
     if(!visible.has(v.en)) cls += " dim";
-    if(state.selected === v.en) cls += " active";
     c.setAttribute("class", cls);
     c.addEventListener("click", () => selectVenue(v.en));
-    c.addEventListener("mouseenter", () => {
-      // optional preview
-    });
     g.appendChild(c);
   });
+
+  // Render active dot with spotlight halo
+  if(activeVenue){
+    const pos = positions[activeVenue.area];
+    if(pos){
+      const [x,y] = pos;
+      const seed = (activeVenue.en.charCodeAt(0) + activeVenue.en.length * 7) % 20;
+      const jx = ((seed % 5) - 2) * 4;
+      const jy = ((Math.floor(seed/5)) - 2) * 4;
+      const cx = x + jx, cy = y + jy;
+
+      // Outer glow halo (largest, most diffuse)
+      const halo3 = document.createElementNS("http://www.w3.org/2000/svg","circle");
+      halo3.setAttribute("cx", cx);
+      halo3.setAttribute("cy", cy);
+      halo3.setAttribute("r", 32);
+      halo3.setAttribute("class", "spotlight-halo-3");
+      g.appendChild(halo3);
+
+      const halo2 = document.createElementNS("http://www.w3.org/2000/svg","circle");
+      halo2.setAttribute("cx", cx);
+      halo2.setAttribute("cy", cy);
+      halo2.setAttribute("r", 18);
+      halo2.setAttribute("class", "spotlight-halo-2");
+      g.appendChild(halo2);
+
+      const halo1 = document.createElementNS("http://www.w3.org/2000/svg","circle");
+      halo1.setAttribute("cx", cx);
+      halo1.setAttribute("cy", cy);
+      halo1.setAttribute("r", 10);
+      halo1.setAttribute("class", "spotlight-halo-1");
+      g.appendChild(halo1);
+
+      // The active dot itself
+      const c = document.createElementNS("http://www.w3.org/2000/svg","circle");
+      c.setAttribute("cx", cx);
+      c.setAttribute("cy", cy);
+      c.setAttribute("r", 5.5);
+      c.setAttribute("class", "dot active-dot");
+      c.addEventListener("click", () => selectVenue(activeVenue.en));
+      g.appendChild(c);
+    }
+  }
 }
 
 function renderRows(){
@@ -844,7 +1010,6 @@ function renderRows(){
     row.className = "row" + (state.selected === v.en ? " active" : "");
     row.innerHTML = `
       <div class="place-cell">
-        <span class="star">${v.star ? "★" : ""}</span>
         <span class="jp-name">${v.jp}</span>
         <span class="en-name">${v.en}</span>
       </div>
@@ -865,11 +1030,15 @@ function renderRows(){
 function renderDetail(){
   const el = document.getElementById("detail");
   if(!state.selected){
-    el.innerHTML = '<div class="detail-empty">Select a venue to view details.</div>';
+    el.innerHTML = '<div class="detail-inner"><div class="detail-empty">Select a venue to view details.</div></div>';
+    el.classList.remove("open");
     return;
   }
   const v = venues.find(x => x.en === state.selected);
-  if(!v){ el.innerHTML = '<div class="detail-empty">Not found.</div>'; return }
+  if(!v){
+    el.innerHTML = '<div class="detail-inner"><div class="detail-empty">Not found.</div></div>';
+    return;
+  }
 
   const openText = v.open.map(([a,b]) => {
     const fmt = h => {
@@ -883,93 +1052,59 @@ function renderDetail(){
   const typeLabels = {K:"Kissa",L:"Live",B:"Bar",D:"Daytime"};
   const pills = v.types.map(t => `<span class="pill on">${typeLabels[t]}</span>`).join("");
 
-  // Generate Aesop-style placeholder collage based on venue characteristics
-  const seed = v.en.charCodeAt(0) + v.en.length;
-  const isKissa = v.types.includes("K");
-  const isBar = v.types.includes("B");
-  const isLive = v.types.includes("L");
-  const collageVariant = seed % 4;
-
-  const palettes = [
-    ['#8a6a3a','#5a3a20','#c9a878'],
-    ['#3a2a1a','#7a4a2a','#a87a4a'],
-    ['#5a3a20','#a8804a','#d4b078'],
-    ['#2a1a10','#6a4a2a','#b8905a']
-  ];
-  const p = palettes[seed % 4];
-
-  // Three different collage layouts — Aesop-inspired asymmetric
-  const collages = [
-    // Layout A: large left + two stacked right
-    `<div class="collage layout-a">
-      <div class="img img-1" style="background:linear-gradient(135deg,${p[0]},${p[1]});">
-        ${isKissa ? '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="35" fill="none" stroke="rgba(255,240,210,0.25)" stroke-width="0.5"/><circle cx="50" cy="50" r="25" fill="none" stroke="rgba(255,240,210,0.2)" stroke-width="0.4"/><circle cx="50" cy="50" r="15" fill="none" stroke="rgba(255,240,210,0.15)" stroke-width="0.4"/><circle cx="50" cy="50" r="5" fill="rgba(255,240,210,0.3)"/></svg>' : '<svg viewBox="0 0 100 100"><line x1="20" y1="80" x2="80" y2="20" stroke="rgba(255,240,210,0.2)" stroke-width="0.5"/><line x1="20" y1="60" x2="80" y2="40" stroke="rgba(255,240,210,0.15)" stroke-width="0.4"/><line x1="20" y1="40" x2="80" y2="60" stroke="rgba(255,240,210,0.15)" stroke-width="0.4"/></svg>'}
-      </div>
-      <div class="img img-2" style="background:linear-gradient(180deg,${p[1]},${p[2]});"></div>
-      <div class="img img-3" style="background:linear-gradient(45deg,${p[2]},${p[0]});"></div>
-    </div>`,
-    // Layout B: top wide + two below
-    `<div class="collage layout-b">
-      <div class="img img-1" style="background:linear-gradient(90deg,${p[1]},${p[0]});">
-        <svg viewBox="0 0 200 60"><line x1="20" y1="30" x2="180" y2="30" stroke="rgba(255,240,210,0.2)" stroke-width="0.4"/><circle cx="100" cy="30" r="10" fill="none" stroke="rgba(255,240,210,0.3)" stroke-width="0.5"/></svg>
-      </div>
-      <div class="img img-2" style="background:linear-gradient(135deg,${p[2]},${p[1]});"></div>
-      <div class="img img-3" style="background:linear-gradient(225deg,${p[0]},${p[2]});"></div>
-    </div>`,
-    // Layout C: offset diagonal
-    `<div class="collage layout-c">
-      <div class="img img-1" style="background:linear-gradient(135deg,${p[0]},${p[2]});">
-        <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,240,210,0.2)" stroke-width="0.4"/></svg>
-      </div>
-      <div class="img img-2" style="background:linear-gradient(90deg,${p[1]},${p[0]});"></div>
-    </div>`,
-    // Layout D: triptych
-    `<div class="collage layout-d">
-      <div class="img img-1" style="background:linear-gradient(180deg,${p[0]},${p[1]});"></div>
-      <div class="img img-2" style="background:linear-gradient(180deg,${p[1]},${p[2]});">
-        <svg viewBox="0 0 100 200"><line x1="50" y1="20" x2="50" y2="180" stroke="rgba(255,240,210,0.2)" stroke-width="0.4"/></svg>
-      </div>
-      <div class="img img-3" style="background:linear-gradient(180deg,${p[2]},${p[0]});"></div>
-    </div>`
-  ];
-
-  // Google Maps search query: venue name + ward + Tokyo
   const mapsQuery = encodeURIComponent(`${v.en} ${v.jp} ${v.ward} 東京`);
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
 
   el.innerHTML = `
-    <div class="detail-loc">
-      <span class="jp">${v.ward}</span> · ${v.area.toUpperCase()}
-    </div>
-    <h2>${v.en}</h2>
-    <div class="alt-name">${v.jp}${v.star ? '  ·  ★ M' : ''}</div>
-
-    ${collages[collageVariant]}
-
-    <div class="pills">${pills}</div>
-
-    <div class="section">
-      <h3>About</h3>
-      <p class="about">${v.about}</p>
-    </div>
-
-    <div class="section">
-      <h3>Details</h3>
-      <div class="meta-grid">
-        <div><div class="k">Sound</div>${v.sound}</div>
-        <div><div class="k">Hours</div>${openText}</div>
-        <div><div class="k">Cover</div>${v.cover}</div>
-        <div><div class="k">Order</div>${v.order}</div>
-        <div><div class="k">Air</div>${v.smoke ? "Smoking allowed" : "Non-smoking"}</div>
-        <div><div class="k">Area</div>${v.area}</div>
+    <button class="detail-back" id="detail-back">← Back</button>
+    <button class="detail-close" id="detail-close" aria-label="Close">×</button>
+    <div class="detail-inner">
+      <div class="detail-loc">
+        <span class="jp">${v.ward}</span> · ${v.area.toUpperCase()}
       </div>
-    </div>
+      <h2>${v.en}</h2>
+      <div class="alt-name">${v.jp}</div>
 
-    <a class="maps-link" href="${mapsUrl}" target="_blank" rel="noopener noreferrer">
-      View on Google Maps
-      <span class="arrow">↗</span>
-    </a>
+      <div class="pills">${pills}</div>
+
+      <div class="section">
+        <h3>About</h3>
+        <p class="about">${v.about}</p>
+      </div>
+
+      <div class="section">
+        <h3>Details</h3>
+        <div class="meta-grid">
+          <div><div class="k">Sound</div>${v.sound}</div>
+          <div><div class="k">Hours</div>${openText}</div>
+          <div><div class="k">Cover</div>${v.cover}</div>
+          <div><div class="k">Order</div>${v.order}</div>
+          <div><div class="k">Air</div>${v.smoke ? "Smoking allowed" : "Non-smoking"}</div>
+          <div><div class="k">Area</div>${v.area}</div>
+        </div>
+      </div>
+
+      <a class="maps-link" href="${mapsUrl}" target="_blank" rel="noopener noreferrer">
+        View on Google Maps
+        <span class="arrow">↗</span>
+      </a>
+    </div>
   `;
+
+  // Bind close handlers (mobile only — desktop hides them via CSS)
+  const closeBtn = document.getElementById("detail-close");
+  const backBtn = document.getElementById("detail-back");
+  const closeAction = () => {
+    el.classList.remove("open");
+    state.selected = null;
+    renderDots();
+    renderRows();
+  };
+  if(closeBtn) closeBtn.addEventListener("click", closeAction);
+  if(backBtn) backBtn.addEventListener("click", closeAction);
+
+  // Open the modal on mobile
+  el.classList.add("open");
 }
 
 function selectVenue(en){
@@ -1026,66 +1161,121 @@ document.getElementById("reset-btn").addEventListener("click", () => {
 })();
 
 /* =========================================================
-   VINYL LOADER — manual click to enter
+   VINYL LOADER — three paths:
+   1. Click ▶ button → auto-drop needle animation + start music (stay on cover)
+      Click again → pause + lift needle
+   2. Click "enter the map" → enter site (music continues if playing, silent if not)
+   3. Vinyl itself is decorative only — no click action
    ========================================================= */
-document.getElementById("loader-enter").addEventListener("click", () => {
-  document.getElementById("loader").classList.add("gone");
-});
+(function vinylLoader(){
+  const loader = document.getElementById("loader");
+  const enterBtn = document.getElementById("loader-enter");
+  const playBtn = document.getElementById("play-cover-btn");
+  const playIcon = document.getElementById("play-icon");
+  const playLabel = document.getElementById("play-label");
+  const armGroup = document.getElementById("arm-group");
+  const vinylDisc = document.getElementById("loader-vinyl");
+
+  const PIVOT = {x: 170, y: 30};
+  const REST_DEG = -35;
+  const PLAY_DEG = -8;
+
+  let isPlaying = false;
+  let animating = false;
+
+  function setRotation(deg){
+    armGroup.setAttribute("transform", `rotate(${deg} ${PIVOT.x} ${PIVOT.y})`);
+  }
+
+  function animateTo(from, to, duration, done){
+    animating = true;
+    const start = performance.now();
+    function tick(now){
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setRotation(from + (to - from) * eased);
+      if(t < 1) requestAnimationFrame(tick);
+      else { animating = false; if(done) done(); }
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function startPlaying(){
+    if(animating) return;
+    isPlaying = true;
+    playBtn.classList.add("playing");
+    playIcon.textContent = "❚❚";
+    playLabel.textContent = "now playing";
+    // Animate arm to record
+    animateTo(REST_DEG, PLAY_DEG, 700, () => {
+      vinylDisc.classList.add("playing");
+      // Start music with retries
+      let attempts = 0;
+      const tryStart = () => {
+        if(typeof window.__fmStart === "function"){
+          window.__fmStart();
+        }
+        attempts++;
+        if(attempts < 8){
+          setTimeout(tryStart, 500);
+        }
+      };
+      tryStart();
+    });
+  }
+
+  function stopPlaying(){
+    if(animating) return;
+    isPlaying = false;
+    playBtn.classList.remove("playing");
+    playIcon.textContent = "▶";
+    playLabel.textContent = "drop the needle";
+    vinylDisc.classList.remove("playing");
+    // Pause music
+    if(typeof window.__fmPause === "function"){
+      window.__fmPause();
+    }
+    // Lift arm back to rest
+    animateTo(PLAY_DEG, REST_DEG, 600);
+  }
+
+  playBtn.addEventListener("click", () => {
+    if(isPlaying) stopPlaying();
+    else startPlaying();
+  });
+
+  enterBtn.addEventListener("click", () => {
+    loader.classList.add("gone");
+    // Music keeps playing because the SoundCloud iframe is in DOM and unaffected by loader fade-out
+  });
+
+  setRotation(REST_DEG);
+})();
 
 /* =========================================================
-   JAZZ FM PLAYER
-   Public domain 78rpm jazz tracks from Internet Archive.
-   All recordings pre-1929, in U.S. public domain.
+   JAZZ FM PLAYER — SoundCloud Widget API
+   Uses real public SoundCloud playlists/sets for stable playback.
    ========================================================= */
-const fmTracks = [
-  {
-    title: "Dipper Mouth Blues — King Oliver's Jazz Band (1923)",
-    src: "https://archive.org/download/78_dippermouth-blues_king-olivers-jazz-band_gbia0011094b/Dippermouth%20Blues%20-%20King%20Olivers%20Jazz%20Band.mp3"
-  },
-  {
-    title: "West End Blues — Louis Armstrong (1928)",
-    src: "https://archive.org/download/78_west-end-blues_louis-armstrong-and-his-hot-five-clarence-williams_gbia0011094a/West%20End%20Blues%20-%20Louis%20Armstrong%20and%20his%20Hot%20Five.mp3"
-  },
-  {
-    title: "Black and Tan Fantasy — Duke Ellington (1927)",
-    src: "https://archive.org/download/78_black-and-tan-fantasy_duke-ellington-and-his-orchestra-bubber-miley-duke-ell_gbia0001317a/Black%20and%20Tan%20Fantasy%20-%20Duke%20Ellington%20and%20his%20Orchestra.mp3"
-  },
-  {
-    title: "Singin' the Blues — Frankie Trumbauer & Bix Beiderbecke (1927)",
-    src: "https://archive.org/download/78_singin-the-blues_frank-trumbauer-and-his-orchestra-with-bix-beiderbecke-rob_gbia0001317b/Singin%20the%20Blues%20-%20Frank%20Trumbauer%20and%20his%20Orchestra.mp3"
-  },
-  {
-    title: "Heebie Jeebies — Louis Armstrong & His Hot Five (1926)",
-    src: "https://archive.org/download/78_heebie-jeebies_louis-armstrong-and-his-hot-five_gbia0011094c/Heebie%20Jeebies%20-%20Louis%20Armstrong%20and%20his%20Hot%20Five.mp3"
-  },
-  {
-    title: "St. Louis Blues — Bessie Smith (1925)",
-    src: "https://archive.org/download/78_st-louis-blues_bessie-smith-louis-armstrong-fred-longshaw-w-c-handy_gbia0001317c/St%20Louis%20Blues%20-%20Bessie%20Smith.mp3"
-  },
-  {
-    title: "Charleston — Paul Whiteman (1925)",
-    src: "https://archive.org/download/78_charleston_paul-whiteman-and-his-orchestra-cecil-mack-jimmy-johnson_gbia0001317d/Charleston%20-%20Paul%20Whiteman.mp3"
-  }
+const fmChannels = [
+  "https://soundcloud.com/relaxmusicrecords/smooth-jazz-music-elegant-sax-jazz-playlist-for-relax",
+  "https://soundcloud.com/vibrantday/sets/friday-jazz-smooth-jazz",
+  "https://soundcloud.com/smoothjazz24h/sets/bar-of-jazz-mellow-music-for",
+  "https://soundcloud.com/finnjoe/jazzy-cooking-house-music-mix-groovy-smooth-jazz-mix-b2b-with-carlito"
 ];
 
 (function fmPlayer(){
-  const audio = document.getElementById("fm-audio");
+  const iframe = document.getElementById("sc-iframe");
   const playBtn = document.getElementById("fm-play");
   const pauseBtn = document.getElementById("fm-pause");
-  const stopBtn = document.getElementById("fm-stop");
   const skipBtn = document.getElementById("fm-skip");
   const minBtn = document.getElementById("fm-min");
   const trackEl = document.getElementById("fm-track");
   const vinylEl = document.getElementById("fm-vinyl");
   const playerEl = document.getElementById("fm-player");
 
-  let idx = Math.floor(Math.random() * fmTracks.length);
-
-  function loadTrack(i){
-    const t = fmTracks[i];
-    audio.src = t.src;
-    trackEl.textContent = t.title;
-  }
+  let widget = null;
+  let channelIdx = Math.floor(Math.random() * fmChannels.length);
+  let userInitiated = false;
 
   function updateButtonStates(playing){
     vinylEl.classList.toggle("playing", playing);
@@ -1093,17 +1283,81 @@ const fmTracks = [
     pauseBtn.classList.toggle("inactive", !playing);
   }
 
-  function next(){
-    let n;
-    do { n = Math.floor(Math.random() * fmTracks.length); } while(n === idx && fmTracks.length > 1);
-    idx = n;
-    loadTrack(idx);
-    if(!audio.paused){
-      audio.play().catch(() => updateButtonStates(false));
-    }
+  function updateTrackInfo(){
+    if(!widget) return;
+    widget.getCurrentSound((sound) => {
+      if(sound && sound.title){
+        const artist = sound.user && sound.user.username ? sound.user.username : "";
+        trackEl.textContent = artist ? `${sound.title} — ${artist}` : sound.title;
+      }
+    });
   }
 
-  loadTrack(idx);
+  function loadChannel(idx, autoplay){
+    channelIdx = idx;
+    const url = encodeURIComponent(fmChannels[idx]);
+    trackEl.textContent = "Loading...";
+    iframe.src = `https://w.soundcloud.com/player/?url=${url}&auto_play=${autoplay ? 'true' : 'false'}&hide_related=true&show_comments=false&show_user=false&show_reposts=false&visual=false&buying=false&sharing=false&download=false`;
+    iframe.onload = () => {
+      bindWidget();
+    };
+  }
+
+  function bindWidget(){
+    if(typeof SC === "undefined"){
+      setTimeout(bindWidget, 300);
+      return;
+    }
+    widget = SC.Widget(iframe);
+    widget.bind(SC.Widget.Events.READY, () => {
+      updateTrackInfo();
+      if(userInitiated){
+        widget.play();
+      }
+    });
+    widget.bind(SC.Widget.Events.PLAY, () => {
+      updateButtonStates(true);
+      updateTrackInfo();
+    });
+    widget.bind(SC.Widget.Events.PAUSE, () => {
+      updateButtonStates(false);
+    });
+    widget.bind(SC.Widget.Events.FINISH, () => {
+      updateTrackInfo();
+    });
+  }
+
+  function play(){
+    userInitiated = true;
+    if(!widget){
+      bindWidget();
+      // Retry until widget is bound and can play
+      let attempts = 0;
+      const retry = () => {
+        if(widget){
+          try { widget.play(); } catch(e){}
+        }
+        attempts++;
+        if(attempts < 10) setTimeout(retry, 500);
+      };
+      setTimeout(retry, 400);
+      return;
+    }
+    try { widget.play(); } catch(e){}
+  }
+
+  function pause(){
+    if(widget) widget.pause();
+  }
+
+  function skipChannel(){
+    let n;
+    do { n = Math.floor(Math.random() * fmChannels.length); } while(n === channelIdx && fmChannels.length > 1);
+    loadChannel(n, true);
+  }
+
+  iframe.onload = () => bindWidget();
+  bindWidget();
   updateButtonStates(false);
 
   playBtn.addEventListener("click", (e) => {
@@ -1112,29 +1366,17 @@ const fmTracks = [
       playerEl.classList.remove("collapsed");
       return;
     }
-    audio.play().then(() => updateButtonStates(true)).catch(() => {
-      trackEl.textContent = "Track unavailable — skipping...";
-      setTimeout(next, 800);
-    });
+    play();
   });
 
   pauseBtn.addEventListener("click", (e) => {
     e.stopPropagation();
-    audio.pause();
-    updateButtonStates(false);
-  });
-
-  stopBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    audio.pause();
-    audio.currentTime = 0;
-    updateButtonStates(false);
-    trackEl.textContent = fmTracks[idx].title;
+    pause();
   });
 
   skipBtn.addEventListener("click", (e) => {
     e.stopPropagation();
-    next();
+    skipChannel();
   });
 
   minBtn.addEventListener("click", (e) => {
@@ -1148,13 +1390,13 @@ const fmTracks = [
     }
   });
 
-  audio.addEventListener("ended", next);
-  audio.addEventListener("error", () => {
-    trackEl.textContent = "Track unavailable — trying next...";
-    setTimeout(next, 1000);
-  });
-  audio.addEventListener("playing", () => updateButtonStates(true));
-  audio.addEventListener("pause", () => updateButtonStates(false));
+  // Expose to global so the cover vinyl can trigger play/pause
+  window.__fmStart = function(){
+    play();
+  };
+  window.__fmPause = function(){
+    pause();
+  };
 })();
 </script>
 </body>
