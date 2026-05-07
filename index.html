@@ -741,7 +741,10 @@
   <iframe id="sc-iframe"
     src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/relaxmusicrecords/smooth-jazz-music-elegant-sax-jazz-playlist-for-relax&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&visual=false&buying=false&sharing=false&download=false"
     style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:none"
-    allow="autoplay"></iframe>
+    allow="autoplay; encrypted-media"
+    allowfullscreen
+    playsinline
+    webkit-playsinline></iframe>
 </div>
 
 <footer>
@@ -1206,21 +1209,14 @@ document.getElementById("reset-btn").addEventListener("click", () => {
     playBtn.classList.add("playing");
     playIcon.textContent = "❚❚";
     playLabel.textContent = "now playing";
-    // Animate arm to record
+    // CRITICAL FOR MOBILE: trigger play synchronously, before any animation delay.
+    // Mobile browsers reject playback if any async wait separates the user gesture from play().
+    if(typeof window.__fmStart === "function"){
+      window.__fmStart();
+    }
+    // Then run the visual animation
     animateTo(REST_DEG, PLAY_DEG, 700, () => {
       vinylDisc.classList.add("playing");
-      // Start music with retries
-      let attempts = 0;
-      const tryStart = () => {
-        if(typeof window.__fmStart === "function"){
-          window.__fmStart();
-        }
-        attempts++;
-        if(attempts < 8){
-          setTimeout(tryStart, 500);
-        }
-      };
-      tryStart();
     });
   }
 
@@ -1329,21 +1325,21 @@ const fmChannels = [
 
   function play(){
     userInitiated = true;
-    if(!widget){
-      bindWidget();
-      // Retry until widget is bound and can play
-      let attempts = 0;
-      const retry = () => {
-        if(widget){
-          try { widget.play(); } catch(e){}
-        }
-        attempts++;
-        if(attempts < 10) setTimeout(retry, 500);
-      };
-      setTimeout(retry, 400);
-      return;
+    // CRITICAL for mobile: call widget.play() synchronously within the click handler.
+    // Mobile browsers reject playback if there's any async delay between user gesture and play.
+    if(widget){
+      try { widget.play(); } catch(e){}
     }
-    try { widget.play(); } catch(e){}
+    // Also schedule retries in case widget wasn't ready on first sync call
+    let attempts = 0;
+    const retry = () => {
+      if(widget){
+        try { widget.play(); } catch(e){}
+      }
+      attempts++;
+      if(attempts < 8) setTimeout(retry, 400);
+    };
+    setTimeout(retry, 200);
   }
 
   function pause(){
